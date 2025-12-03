@@ -1,0 +1,57 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+PS1='[\u@\h \W]\$ '
+
+alias x="exit"
+alias cad="QT_QPA_PLATFORM=xcb freecad"
+# Fuzzy install from official Arch repos
+fuzzy_pacman_install() {
+  local pkg
+  pkg=$(pacman -Sl \
+        | awk '{print $2}' \
+        | sort -u \
+        | fzf --layout=reverse-list \
+              --preview 'pacman -Si {}' \
+              --preview-window=down:70%:wrap \
+              --prompt="Arch pkg> ")
+  if [[ -n "$pkg" ]]; then
+    sudo pacman -S "$pkg"
+  fi
+}
+
+# Fuzzy install from AUR (requires yay)
+fuzzy_aur_install() {
+  local pkg
+  pkg=$(yay -Ss "" \
+        | awk '{print $1}' \
+        | cut -d/ -f2 \
+        | sort -u \
+        | fzf --layout=reverse-list \
+              --preview 'yay -Si {}' \
+              --preview-window=down:70%:wrap \
+              --prompt="AUR pkg> ")
+  if [[ -n "$pkg" ]]; then
+    yay -S "$pkg"
+  fi
+}
+
+# Unified fuzzy install
+i() {
+  local source
+  source=$(printf "arch\naur" \
+           | fzf --layout=reverse-list \
+                 --preview-window=down:70%:wrap \
+                 --prompt="Source> ")
+  case "$source" in
+    arch) fuzzy_pacman_install ;;
+    aur)  fuzzy_aur_install ;;
+  esac
+}
+
