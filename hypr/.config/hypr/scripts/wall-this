@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log() { echo "[DEBUG] $*"; }
+
+# Ensure hyprpaper is running
+if ! pgrep -x "hyprpaper" > /dev/null; then
+    log "Hyprpaper not running, starting..."
+    nohup hyprpaper >/tmp/hyprpaper.log 2>&1 &
+    sleep 2
+else
+    log "Hyprpaper already running."
+fi
+
+WALLPAPER_DIR="$HOME/.wallpapers"
+
+# Pick category via rofi
+category=$(ls "$WALLPAPER_DIR" | rofi -dmenu -p "Pick theme")
+if [ -z "$category" ]; then
+    log "No category selected, exiting."
+    exit 0
+fi
+log "Category: $category"
+
+# Get focused monitor + resolution
+monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).name')
+width=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).width')
+height=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).height')
+
+log "Monitor: $monitor"
+log "Resolution: ${width}x${height}"
+
+# Orientation
+orient="h"
+[ "$height" -gt "$width" ] && orient="v"
+log "Orientation: $orient"
+
+# Pick random wallpaper
+folder="$WALLPAPER_DIR/$category/$orient"
+if [ ! -d "$folder" ]; then
+    log "ERROR: Folder $folder does not exist."
+    exit 1
+fi
+
+wallpaper=$(find "$folder" -type f | shuf -n 1)
+if [ -z "$wallpaper" ]; then
+    log "ERROR: No wallpapers found in $folder."
+    exit 1
+fi
+log "Selected wallpaper: $wallpaper"
+
+# Set wallpaper
+log "Preloading wallpaper..."
+if ! hyprctl hyprpaper preload "$wallpaper"; then
+    log "ERROR: preload failed."
+    exit 1
+fi
+
+log "Applying wallpaper to $monitor..."
+if ! hyprctl hyprpaper wallpaper "$monitor,$wallpaper"; then
+    log "ERROR: wallpaper command failed."
+    exit 1
+fi
+
+log "Done."

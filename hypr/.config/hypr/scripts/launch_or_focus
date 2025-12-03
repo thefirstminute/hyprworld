@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# A helper script for Hyprland to implement "focus if exists, otherwise launch (and move)".
+#
+# Usage: $launch_focus <window_regex> <command_to_execute> [optional_workspace]
+
+TARGET_REGEX="$1"
+LAUNCH_CMD="$2"
+LAUNCH_WORKSPACE="$3"
+
+# Case-insensitive matching for the entire script
+shopt -s nocasematch
+
+# Variables to hold state while parsing
+CURRENT_ADDR=""
+CURRENT_WS=""
+FOUND_ADDR=""
+FOUND_WS=""
+
+# --- PARSING LOOP ---
+# We read the raw text output of 'hyprctl clients'.
+# This avoids all JSON syntax errors and 'grep' context issues.
+
+while read -r line; do
+    # 1. Detect new Window block (e.g., "Window 5599b53c2310 -> ...")
+    if [[ "$line" =~ ^Window\ ([0-9a-fA-F]+)\ -\> ]]; then
+        # Hyprland outputs address without '0x' in text mode, but dispatch needs it.
+        CURRENT_ADDR="0x${BASH_REMATCH[1]}"
+        CURRENT_WS="" # Reset workspace for the new window context
+    fi
+
+    # 2. Capture Workspace ID (e.g., "workspace: 11 (11)")
+    if [[ "$line" =~ ^\s*workspace:\ ([0-9]+)\ \( ]]; then
+        CURRENT_WS="${BASH_REMATCH[1]}"
+    fi
+
+    # 3. Check Title, Class, and InitialTitle for matches
+    if [[ "$line" =~ ^\s*(title|class|initialTitle):\ (.*) ]]; then
+        VALUE="${BASH_REMATCH[2]}"
+        
+        # Check if the value matches our regex (case-insensitive due to shopt -s nocasematch)
+        if [[ "$VALUE" =~ $TARGET_REGEX ]]; then
+            FOUND_ADDR="$CURRENT_ADDR"
+            FOUND_WS="$CURRENT_WS"
+            # We found it! Stop parsing.
+            break
+        fi
+    fi
+done < <(hyprctl clients)
+
+# --- EXECUTION ---
+
+if [ -n "$FOUND_ADDR" ]; then
+    # SCENARIO: Window Found
+    echo "Window found: $FOUND_ADDR on workspace $FOUND_WS"
+    
+    # 1. Switch to the window's workspace (Reliability step)
+    if [ -n "$FOUND_WS" ]; then
+        hyprctl dispatch workspace "$FOUND_WS"
+    fi
+    
+    # 2. Focus the window explicitly
+    hyprctl dispatch focuswindow address:"$FOUND_ADDR"
+
+else
+    # SCENARIO: Window Not Found -> Launch
+    echo "Window not found. Launching..."
+    
+    # 1. Move to the target workspace if requested
+    if [ -n "$LAUNCH_WORKSPACE" ]; then
+        hyprctl dispatch workspace "$LAUNCH_WORKSPACE"
+        # Tiny sleep to let the workspace transition start
+        sleep 0.1
+    fi
+    
+    # 2. Launch the app (detached to avoid blocking)
+    eval "$LAUNCH_CMD" &
+fi

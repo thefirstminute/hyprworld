@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+STATE_FILE="$HOME/.cache/powersaver_enabled"
+
+# toggle mode
+if [ "$1" = "toggle" ]; then
+    if [ -f "$STATE_FILE" ]; then
+        rm -f "$STATE_FILE"
+        hyprctl notify -1 3200 "rgb(d20f39)" "Power Saver Disabled"
+    else
+        touch "$STATE_FILE"
+        hyprctl notify -1 3200 "rgb(d20f39)" "Power Saver Enabled"
+    fi
+    exit 0
+fi
+
+# check if enabled
+if [ ! -f "$STATE_FILE" ]; then
+    echo "DEBUG: exit = disabled" >> /tmp/powersaver.log
+    exit 0
+fi
+
+# check for active video players
+if pgrep -x mpv >/dev/null || \
+   pgrep -x vlc >/dev/null || \
+   pgrep -f "brave.*--type=utility.*Video.*Decoder" >/dev/null || \
+   pgrep -f "firefox.*WebRTC.*" >/dev/null ; then
+   echo "DEBUG: exit = video" >> /tmp/powersaver.log
+   exit 0
+fi
+
+# check for active downloads
+if pgrep -f "aria2c" >/dev/null || \
+   pgrep -f "wget" >/dev/null || \
+   pgrep -f "curl.*http" >/dev/null ; then
+   echo "DEBUG: exit = download" >> /tmp/powersaver.log
+   exit 0
+fi
+
+# sum rx bytes in last second
+rx1=$(cat /sys/class/net/*/statistics/rx_bytes | awk '{s+=$1} END{print s}')
+sleep 1
+rx2=$(cat /sys/class/net/*/statistics/rx_bytes | awk '{s+=$1} END{print s}')
+rx_diff=$((rx2 - rx1))
+
+# threshold in bytes/sec (adjust as needed)
+if [ "$rx_diff" -gt 100000 ]; then
+    echo "DEBUG: exit = network activity" >> /tmp/powersaver.log
+    exit 0
+fi
+
+
+echo "DEBUG: args = $@" >> /tmp/powersaver.log
+
+"$@"
+exit 0

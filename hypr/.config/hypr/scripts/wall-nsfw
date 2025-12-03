@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Path to wallpapers
+VERT_DIR="$HOME/.wallpapers/nsfw/v"
+HOR_DIR="$HOME/.wallpapers/nsfw/h"
+
+# 1. Define Paths
+WALL1="$HOME/.wallpapers/nsfw/v/"
+WALL2="$HOME/.wallpapers/waifu/"
+WALL3="$HOME/.wallpapers/nsfw/h"
+VARS_FILE="$HOME/.config/hypr/vars.conf"
+
+# 2. Extract Monitor Variables (using your cleaned up method)
+eval "$(
+    grep -E '^\$monitor' "$VARS_FILE" |
+    sed -E 's/^\$([a-zA-Z0-9_]+)\s*=\s*(.*)$/\1="\2"/'
+)"
+
+
+# 3.Check if hyprpaper running, if not, start it silently and disown it
+if ! pgrep -x "hyprpaper" > /dev/null; then
+    nohup hyprpaper >/dev/null 2>&1 & 
+    sleep 1
+fi
+
+# 4. Pick Random Wallpapers FIRST (Store in variables)
+# We use 'find' to get a random file path for each category
+RND1=$(find "$WALL1" -type f | shuf -n1)
+RND2=$(find "$WALL2" -type f | shuf -n1)
+RND3=$(find "$WALL3" -type f | shuf -n1)
+
+echo "monitor1: " $monitor1
+echo $RND1
+echo "monitor2: " $monitor2
+echo $RND2
+echo "monitor3: " $monitor3
+echo $RND3
+
+
+# 5. Preload ONLY the chosen wallpapers
+# (Optional: Unload all previous to free memory from old wallpapers)
+hyprctl hyprpaper unload all
+
+hyprctl hyprpaper preload "$RND1"
+hyprctl hyprpaper preload "$RND2"
+hyprctl hyprpaper preload "$RND3"
+
+# 6. Apply the wallpapers
+# Note: We use the variables we defined in step 4, so we know they match!
+hyprctl hyprpaper wallpaper $monitor1, $RND1
+hyprctl hyprpaper wallpaper $monitor2, $RND2
+hyprctl hyprpaper wallpaper $monitor3, $RND3

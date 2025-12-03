@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+hyprctl notify -1 1200 "rgb(d20f39)" "fuckko"
+# Usage: launch_or_focus.sh <title_regex> <class_regex> <launch_command...>
+# Example: launch_or_focus.sh "copilot" "Thorium-browser" thorium-browser --app=https://copilot.microsoft.com
+
+# Usage: launch_or_focus.sh <title_regex> <class_regex> <launch_command...>
+
+TITLE_REGEX="$1"
+CLASS_REGEX="$2"
+shift 2
+
+ADDR=$(hyprctl clients -j | jq -r \
+  ".[] | select((.title | test(\"$TITLE_REGEX\"; \"i\")) and (.class | test(\"$CLASS_REGEX\"; \"i\"))) | .address" | head -n1)
+
+if [ -n "$ADDR" ]; then
+    hyprctl dispatch focuswindow address:$ADDR
+else
+    uwsm app -- "$@" &
+fi
+

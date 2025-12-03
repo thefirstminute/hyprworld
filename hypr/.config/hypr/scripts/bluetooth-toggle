@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# My Bose QC
+DEVICE_MAC="BC:87:FA:23:5F:63"
+VARS_FILE="$HOME/.config/hypr/vars.conf"
+
+
+# Import Hypr colour variables into bash (only those beginning with $col)
+while IFS="=" read -r key value; do
+    key=$(echo "$key" | tr -d ' $')
+    value=$(echo "$value" | tr -d ' "')
+    if [[ $key == col* ]]; then
+        export "$key"="$value"
+    fi
+done < <(grep -E '^[$]col' "$VARS_FILE")
+
+# Fallback colour (if something breaks)
+: "${colInfo:=rgba(33ccffee)}"
+: "${colSuccess:=rgba(00ff99ee)}"
+: "${colWarn:=rgb(d20f39)}"
+
+notify() {
+    # Why: needs color, duration, title, and message
+    hyprctl notify -1 2500 "$1" "$2" "$3"
+}
+
+notify "$colInfo" "Bluetooth" "Booting Up"
+
+is_connected() {
+    bluetoothctl info "$DEVICE_MAC" | grep -q "Connected: yes"
+}
+
+if is_connected; then
+    bluetoothctl disconnect "$DEVICE_MAC" >/dev/null 2>&1
+    notify "$colWarn" "Bluetooth" "Disconnected"
+else
+    bluetoothctl connect "$DEVICE_MAC" >/dev/null 2>&1
+
+    # After connect, verify success before switching audio.
+    if is_connected; then
+        pactl set-card-profile "bluez_card.$DEVICE_MAC" "a2dp-sink" >/dev/null 2>&1
+        notify "$colSuccess" "Bluetooth" "Connected (A2DP)"
+    else
+        notify "$colWarn" "Bluetooth" "Connection Failed"
+    fi
+fi
+
+exit 0
+

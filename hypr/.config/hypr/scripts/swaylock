@@ -1,0 +1,7 @@
+#!/bin/bash
+# Lock and suspend after 1 hour of idle
+# nope, unistalled that shit
+swayidle -w \
+    timeout 3600 'swaylock -f' \
+    timeout 3660 'systemctl suspend'
+

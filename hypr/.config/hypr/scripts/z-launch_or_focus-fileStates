@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Usage: launch_or_focus.sh <title_regex> <class_regex> <launch_command...>
+# Example: launch_or_focus.sh "youtube" "Thorium-browser" thorium-browser --app=https://youtube.com
+
+TITLE_REGEX="$1"
+CLASS_REGEX="$2"
+shift 2
+CMD="$@"
+
+STATE_FILE="$HOME/.config/hypr/window_state_${TITLE_REGEX}_${CLASS_REGEX}.json"
+
+ADDR=$(hyprctl clients -j | jq -r \
+  ".[] | select((.title | test(\"$TITLE_REGEX\"; \"i\")) and (.class | test(\"$CLASS_REGEX\"; \"i\"))) | .address" | head -n1)
+
+if [ -n "$ADDR" ]; then
+    # Focus existing window
+    hyprctl dispatch focuswindow address:$ADDR
+
+    # Save current geometry + workspace
+    hyprctl clients -j | jq \
+      ".[] | select(.address==\"$ADDR\") | {address, at, size, workspace}" > "$STATE_FILE"
+else
+    # Launch new window
+    uwsm app -- $CMD &
+
+    # Wait for window to appear
+    sleep 0.7
+    ADDR=$(hyprctl clients -j | jq -r \
+      ".[] | select((.title | test(\"$TITLE_REGEX\"; \"i\")) and (.class | test(\"$CLASS_REGEX\"; \"i\"))) | .address" | head -n1)
+
+    if [ -n "$ADDR" ] && [ -f "$STATE_FILE" ]; then
+        # Restore saved geometry + workspace
+        X=$(jq -r '.at[0]' "$STATE_FILE")
+        Y=$(jq -r '.at[1]' "$STATE_FILE")
+        W=$(jq -r '.size[0]' "$STATE_FILE")
+        H=$(jq -r '.size[1]' "$STATE_FILE")
+        WS=$(jq -r '.workspace.id' "$STATE_FILE")
+
+        hyprctl dispatch movetoworkspace $WS address:$ADDR
+        hyprctl dispatch resizewindowpixel exact $W $H address:$ADDR
+        hyprctl dispatch movewindowpixel exact $X $Y address:$ADDR
+    fi
+fi
+

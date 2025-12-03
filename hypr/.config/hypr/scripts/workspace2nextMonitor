@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# This script moves the currently focused workspace to the next available monitor,
+# cycling through all connected displays. Requires 'jq' for JSON parsing.
+
+# --- 1. Get List of Monitor Names and the Active Monitor ---
+
+# Get a JSON array of all connected monitors from hyprctl
+MONITOR_JSON=$(hyprctl monitors -j)
+
+# Extract all monitor names into a space-separated string
+MONITORS=$(echo "$MONITOR_JSON" | jq -r '.[].name')
+MONITOR_ARRAY=($MONITORS)
+NUM_MONITORS=${#MONITOR_ARRAY[@]}
+
+# Identify the name of the currently focused monitor
+ACTIVE_MONITOR=$(echo "$MONITOR_JSON" | jq -r '.[] | select(.focused) | .name')
+
+# --- 2. Determine the Next Monitor ---
+
+CURRENT_INDEX=-1
+# Find the array index of the active monitor
+for i in "${!MONITOR_ARRAY[@]}"; do
+   if [[ "${MONITOR_ARRAY[$i]}" == "$ACTIVE_MONITOR" ]]; then
+       CURRENT_INDEX=$i
+       break
+   fi
+done
+
+# If the monitor was found, calculate the next index.
+# We use the modulo operator (%) to ensure the index wraps back to 0 (the first monitor)
+# when we reach the end of the array.
+if [ "$CURRENT_INDEX" -ge 0 ]; then
+    NEXT_INDEX=$(((CURRENT_INDEX + 1) % NUM_MONITORS))
+    NEXT_MONITOR_NAME=${MONITOR_ARRAY[$NEXT_INDEX]}
+else
+    # Fallback/Error case if no monitor is focused (shouldn't happen)
+    exit 1
+fi
+
+# --- 3. Execute the Dispatch Command ---
+
+if [ -n "$NEXT_MONITOR_NAME" ]; then
+    # Use hyprctl dispatch to move the entire current workspace to the calculated next monitor
+    hyprctl dispatch movecurrentworkspacetomonitor "$NEXT_MONITOR_NAME"
+fi
