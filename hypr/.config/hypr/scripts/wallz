@@ -33,6 +33,20 @@ echo "monitor3: " $monitor3
 echo $RND3
 
 
+# pywal set colors from wall paper:
+if command -v wal >/dev/null 2>&1; then
+    wal -i "$RND1"
+
+    # Reload waybar
+    if command -v waybar >/dev/null 2>&1; then
+        pkill waybar
+        waybar &
+    fi
+
+
+fi
+
+
 # 5. Preload ONLY the chosen wallpapers
 # (Optional: Unload all previous to free memory from old wallpapers)
 hyprctl hyprpaper unload all
