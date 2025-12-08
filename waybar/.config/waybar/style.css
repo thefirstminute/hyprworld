@@ -1,144 +1,77 @@
 @import '/home/jrk/.cache/wal/colors-waybar.css';
 
-@define-color main-background @color0;
-@define-color border-color @color3;
-@define-color highlight-color @color2;
 @define-color text-normal #EEEEEE;
 @define-color text-bold #FFFFFF;
-@define-color accent-color @color3;
-@define-color urgent-color @color1;
-@define-color muted-color @color8;
-@define-color hover-highlight @color6;
+@define-color btn @color2;
+@define-color brdr @color5;
+@define-color hi @color1;
+@define-color acc @color3;
+@define-color urg @color2;
+@define-color muted @color15;
+@define-color hvr @color7;
 
 * {
-    font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 13px;
+  min-height: 0;
+  min-width: 0;
+  font-family: Hack, FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 window#waybar {
-    background-color: @main-background;
-    color: @text-normal;
-    transition-property: background-color;
-    transition-duration: .5s;
-    opacity: 0.7;
-}
-
-window#waybar.hidden {
-    opacity: 0.2;
-}
-
-button {
-    /* Use box-shadow instead of border so the text isn't offset */
-    box-shadow: inset 0 -3px transparent;
-    /* Avoid rounded borders under each button name */
-    border: none;
-    border-radius: 0;
-}
-
-/* you can set a style on hover for any module like this */
-#pulseaudio:hover {
-    background-color: @hover-highlight;
+  background: alpha(@background, 0.9);
 }
 
 #workspaces button {
-    padding: 0 5px;
-    background-color: transparent;
-    color: @text-normal;
+  padding: 0.3rem 0.6rem;
+  margin: 0.4rem 0.25rem;
+  border-radius: 6px;
+  background-color: @btn;
+  color: @text-normal;
+  border:none;
 }
 
 #workspaces button:hover {
-    box-shadow: inset 0 -3px @hover-highlight;
-}
-
-#workspaces button.focused {
-    box-shadow: inset 0 -3px @text-bold;
-}
-
-#workspaces button.urgent {
-    background-color: @urgent-color;
+  background-color: @hvr;
+  color: @text-bold;
 }
 
 #workspaces button.active {
-    background-color: @highlight-color;
+  background-color: @hi;
+  color: @text-bold;
+}
+
+#workspaces button.urgent {
+  background-color: @urg;
+  color: @text-bold;
 }
 
 #clock,
-#network,
-#pulseaudio,
-#tray,
-#mode,
 #idle_inhibitor,
-#power-profiles-daemon {
-    color: @text-normal;
-}
-
+#power-profiles-daemon,
+#pulseaudio,
+#network,
+#custom-logo,
+#custom-power,
+#custom-spotify,
+#custom-notification,
+#cpu,
+#tray,
+#memory,
 #window,
-#workspaces {
-    margin: 0 4px;
+#mpris {
+  padding: 0.3rem 0.6rem;
+  margin: 0.4rem 0.25rem;
+  border-radius: 6px;
+  background-color: @brdr;
+  color: @text-normal;
 }
 
-/* If workspaces is the leftmost module, omit left margin */
-.modules-left > widget:first-child > #workspaces {
-    margin-left: 0;
+#mpris.playing {
+  color: @text-bold;
 }
-
-/* If workspaces is the rightmost module, omit right margin */
-.modules-right > widget:last-child > #workspaces {
-    margin-right: 0;
-}
-
-#clock {
-    background-color: @accent-color;
-    color: @text-bold;
-}
-
-#power-profiles-daemon {
-    padding-right: 15px;
-}
-
-#power-profiles-daemon.performance {
-    background-color: @accent-color;
-    color: @text-bold;
-}
-
-#power-profiles-daemon.balanced {
-    background-color: @highlight-color;
-    color: @text-bold;
-}
-
-#power-profiles-daemon.power-saver {
-    background-color: @muted-color;
-    color: @text-bold;
-}
-
-label:focus {
-    background-color: @border-color;
-}
-
-#network {
-    background-color: @highlight-color;
-    color: @text-bold;
-}
-
-#network.disconnected {
-    background-color: @urgent-color;
-}
-
-#pulseaudio {
-    background-color: @accent-color;
-    color: @text-bold;
-}
-
-#pulseaudio.muted {
-    background-color: @muted-color;
-}
-
-#tray {
-    background-color: @highlight-color;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
+#mpris.paused {
+  color: @muted;
 }
 
 #tray > .needs-attention {
@@ -147,10 +80,21 @@ label:focus {
 }
 
 #idle_inhibitor {
-    background-color: @border-color;
+  background: transparent;
+  color: @muted;
+}
+#idle_inhibitor.activated {
+  color: @urg;
 }
 
-#idle_inhibitor.activated {
-    background-color: @text-bold;
-    color: @border-color;
+#power-profiles-daemon {
+  color: @text-normal;
+  background-color: transparent;
 }
+#power-profiles-daemon.performance {
+    color: @urg;
+}
+#power-profiles-daemon.power-saver {
+    color: @muted;
+}
+

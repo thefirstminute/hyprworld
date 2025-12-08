@@ -1,61 +1,68 @@
 // -*- mode: jsonc -*-
 {
-    "reload_style_on_change": true,
-    "reload_on_change": true,
-    "layer": "top", // Waybar at top layer
-    "position": "bottom", // Waybar position (top|bottom|left|right)
-    "height": 22, // Waybar height (to be removed for auto height)
-    // "width": 1280, // Waybar width
-    "spacing": 0, // Gaps between modules (4px)
+  "reload_style_on_change": true,
+  "reload_on_change": true,
+  "layer": "top",
+  "position": "bottom", // Waybar position (top|bottom|left|right)
+  "spacing": 0, // Gaps between modules (4px)
+  "output": "DP-1",
+  "fixed-center": false,
+
     // Choose the order of the modules
-    "output": "DP-1",
     "modules-left": [
-        "power-profiles-daemon",
-        "clock",
-        "hyprland/workspaces"
+      "power-profiles-daemon",
+      "idle_inhibitor",
+      "sep",
+      "clock",
+      "hyprland/workspaces"
     ],
     "modules-center": [
-        "hyprland/window"
+      "hyprland/window"
     ],
     "modules-right": [
-        "idle_inhibitor",
-        "pulseaudio",
-        "network",
-        "tray"
-        // "keyboard-state"
+      "mpris",
+      "pulseaudio",
+      "network",
+        // "keyboard-state",
+      "tray"
     ],
 
+    "custom/sep": {
+      "format": "|",
+      "tooltip": false
+    },
+
     "hyprland/workspaces": {
-        "disable-scroll": true,
-        "warp-on-scroll": false,
-        "all-outputs": true,
-        "format": "{icon}",
-        "format-icons": {
-            "1": "1",
-            "2": "2",
-            "3": "3",
-            "4": "4",
-            "5": "5",
-            "6": "6",
-            "7": "7",
-            "8": "8",
-            "9": "9",
-            "10": "0",
-            "11": "Y",
-            "12": "U",
-            "13": "I",
-            "14": "O",
-            "15": "P",
-            "16": "[",
-            "17": "]",
-            "18": ";",
-            "19": "'",
-            "20": "20",
-            "21": "21",
-            "22": "22",
-            "23": "23",
-            "24": "24"
-        }
+      "disable-scroll": true,
+      "warp-on-scroll": false,
+      "all-outputs": true,
+      "format": "{icon}",
+      "format-icons": {
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8",
+        "9": "9",
+        "10": "0",
+        "11": "Y",
+        "12": "U",
+        "13": "I",
+        "14": "O",
+        "15": "P",
+        "16": "[",
+          "17": "]",
+          "18": ";",
+          "19": "'",
+          "20": "20",
+          "21": "21",
+          "22": "22",
+          "23": "23",
+          "24": "24"
+      }
     },
 
     // "keyboard-state": {
@@ -69,25 +76,27 @@
     // },
 
     "idle_inhibitor": {
-        "format": "{icon}",
-        "format-icons": {
-            "activated": "",
-            "deactivated": ""
-        }
+      "format": "{icon}",
+      "format-icons": {
+        "activated": "",
+        "deactivated": ""
+      }
     },
     "tray": {
-        "icon-size": 15,
-        "spacing": 5,
-        "icons": {
-          "blueman": "bluetooth",
-          "TelegramDesktop": "$HOME/.local/share/icons/hicolor/16x16/apps/telegram.png"
-        }
+      "icon-size": 15,
+      // "spacing": 5,
+      "icons": {
+        "blueman": "bluetooth",
+        "TelegramDesktop": "$HOME/.local/share/icons/hicolor/16x16/apps/telegram.png"
+      }
     },
     "clock": {
         // "timezone": "America/New_York",
         "format": "{:%I:%M}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
+        // "format-alt": "{:%Y-%m-%d}"
+        "on-click": "exec ~/.config/rofi/scripts/rofi_alarm.sh"
+
     },
     "power-profiles-daemon": {
       "format": "{icon}",
@@ -100,6 +109,20 @@
         "power-saver": ""
       }
     },
+    "mpris": {
+      "max-length": 20,
+      "player": "spotify",
+      "format": "{player_icon}",
+      "format-paused": "{status_icon}",
+      "tooltip-format": ["artist", "title", "album"],
+      "status-icons": {
+        "paused": ""
+      },
+      "player-icons": {
+        "default": ""
+      }
+    },
+
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
         "format-wifi": "{essid} ({signalStrength}%) ",
@@ -118,14 +141,14 @@
         "format-source": "{volume}% ",
         "format-source-muted": "",
         "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
+          "headphone": "",
+          "hands-free": "",
+          "headset": "",
+          "phone": "",
+          "portable": "",
+          "car": "",
+          "default": ["", "", ""]
         },
         "on-click": "pavucontrol"
-    },
+    }
 }

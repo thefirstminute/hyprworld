@@ -1,0 +1,49 @@
+#!/bin/sh
+
+### Git Stuff:
+alias lg="lazygit"
+alias gitit="git add . && git status && git commit"
+alias gas="git add . && git status"
+alias nb='git checkout -b "$USER-$(date +%s)"' # new branch
+alias ga='git add . --all'
+alias gb='git branch'
+alias gcl='git clone'
+alias gc='git commit -a'
+alias gco='git checkout'
+alias gd="git diff ':!*lock'"
+alias gdf='git diff' # git diff (full)
+alias gi='git init'
+alias gl='git log'
+alias gp='git push origin HEAD'
+alias gr='git rev-parse --show-toplevel' # git root
+alias gs='git status'
+alias gt='git tag'
+alias gu='git pull' # gu = git update
+
+
+# because `master` is sometimes `main` (or others), these must be functions.
+gmb() { # git main branch
+	local main
+	main=$(git symbolic-ref --short refs/remotes/origin/HEAD)
+	main=${main#origin/}
+	[[ -n $main ]] || return 1
+	echo "$main"
+}
+
+# show the diff from inside a branch to the main branch
+gbd() { # git branch diff
+	local mb=$(gmb) || return 1
+	git diff "$mb..HEAD"
+}
+
+# checkout the main branch and update it
+gcm() { # git checkout $main
+	local mb=$(gmb) || return 1
+	git checkout "$mb" && git pull
+}
+
+# merge the main branch into our branch
+gmm() { # git merge $main
+	local mb=$(gmb) || return 1
+	git merge "$mb"
+}

@@ -1,0 +1,188 @@
+#!/bin/sh
+
+## Smart cd
+function cd() {
+  if [ -d "$@" ]; then
+    echo -n "Stack: "
+    pushd "$@"
+    l
+  else
+    builtin cd "$@"
+  fi
+}
+
+
+### Goto Docs ++
+function d {
+  if [ ! -n "$1" ]; then
+    cd $HOME/Documents && clear && l
+  elif [ -d $HOME/Documents/$1 ]; then
+    cd $HOME/Documents/$1 && clear && l
+  else
+    cd $HOME/Documents
+    clear
+    l
+    echo "'$1' Not found"
+  fi
+}
+
+
+### ls & Grep
+function lsg {
+  l | grep -i "$1"
+}
+
+
+### Make Directory & Switch To It
+function mkcd {
+  if [ ! -n "$1" ]; then
+    echo "Enter a directory name"
+  elif [ -d $1 ]; then
+    echo "$1 already exists"
+  else
+    mkdir -p $1 && cd $1
+  fi
+}
+
+
+### Nicer Help
+alias bathelp='bat --plain --language=help'
+help() {
+    "$@" --help 2>&1 | bathelp
+}
+
+
+### Quick Configs:
+function c {
+  if [ ! -n "$1" ]; then
+    cd ~/.config && l
+  elif [ "$1" == "h" ]; then
+    cd ~/.config/hypr && l
+  elif [ "$1" == "hs" ]; then
+    cd ~/.config/hypr/scripts && l
+  elif [ "$1" == "a" ]; then
+    cd ~/.config/awesome && l
+  elif [ "$1" == "app" ]; then
+    cd ~/Applications && l
+  elif [ "$1" == "d" ]; then
+    cd ~/Documents && l
+  elif [ "$1" == "n" ]; then
+    cd ~/.config/nvim && l
+  elif [ "$1" == "r" ]; then
+    cd ~/.config/rofi && l
+  elif [ "$1" == "ak" ]; then
+    cd /var/www/html/ak && l
+  elif [ "$1" == "w" ]; then
+    cd /var/www/html/ && l
+  else
+    cd ~/.config/$1 && l
+  fi
+}
+
+
+### Todo List In Current Directory
+function todo {
+  [[ ! -f 1.todo.md ]] && touch 1.todo.md
+
+  if [ ! -n "$1" ]; then
+    cat 1.todo.md
+  elif [ "$1" == "ed" ]; then
+    preferred_editor 1.todo.md
+  else
+    echo "- [ ] $1" >> 1.todo.md
+  fi
+}
+
+
+### Find In File
+fif() {
+  if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    cat <<'EOF'
+Usage: fif <pattern> [exclusions]
+
+Search for a regex pattern in the current directory tree with ripgrep + fzf,
+and open results in Neovim.
+
+Arguments:
+  <pattern>        Regex pattern to search for (e.g. 'mail\s*\(')
+  [exclusions]     Optional comma-separated list of file/dir patterns to exclude
+                   (always excludes vendor,node_modules)
+
+Examples:
+  fif 'send_mail\s*\('
+  fif 'mail\s*\(' 'phpmailer,cache,*.min.js'
+
+fzf controls:
+  - Type text       → filter results by substring
+  - !pattern        → exclude results containing 'pattern'
+  - pattern1 pattern2 → AND logic (must match both)
+  - pattern1|pattern2 → OR logic
+  - ^pattern / pattern$ → match start / end of line
+  - Tab / Shift-Tab → mark multiple results
+  - Enter           → open selected file(s) in Neovim
+  - Esc / Ctrl-C    → exit without opening
+EOF
+    return 0
+  fi
+
+  # Always-excluded directories
+  local excludes=(--glob '!**/vendor/**' --glob '!**/node_modules/**' --glob '!**/plugins/**')
+
+  # Optional second parameter: comma-separated list of extra exclusions
+  if [ $# -ge 2 ] && [ -n "$2" ]; then
+    IFS=',' read -ra EXTRA <<< "$2"
+    for e in "${EXTRA[@]}"; do
+      excludes+=(--glob "!**/$e")
+      excludes+=(--glob "!**/$e/**")
+    done
+  fi
+
+  rg --vimgrep --no-heading --color=always -e "$1" "${excludes[@]}" \
+    | fzf --ansi --multi --delimiter : \
+          --preview 'batcat --style=numbers --color=always --highlight-line {2} {1}' \
+          --preview-window=up:60%:wrap \
+    | awk -F: '{print "+"$2" "$1}' \
+    | xargs -r nvim
+}
+
+
+bu() {
+    local src="$PWD"
+    local user=$(whoami)
+    local target_drive="My Passport"   # default drive
+
+    # Use param if given (case-insensitive)
+    if [[ -n "$1" ]]; then
+        target_drive="$1"
+    fi
+
+    local drive_path="/media/$user/$target_drive"
+    local dest="$drive_path$src"
+
+    # Verify drive is mounted, try mounting if not
+    if [[ ! -d "$drive_path" ]]; then
+        echo "[!] Drive '$target_drive' not mounted. Trying to mount..."
+        udisksctl mount -b "/dev/disk/by-label/$target_drive" 2>/dev/null
+        sleep 2
+    fi
+
+    # Check again after mount attempt
+    if [[ ! -d "$drive_path" ]]; then
+        echo "[!] Failed to find or mount drive '$target_drive' at $drive_path"
+        return 1
+    fi
+
+    # Ensure destination exists
+    mkdir -p "$dest"
+
+    # Log file
+    local log_file="$HOME/.bu_log"
+
+    echo "[+] Backing up $src -> $dest" | tee -a "$log_file"
+
+    # Run rsync
+    rsync -avh --progress --update --delete "$src/" "$dest/" | tee -a "$log_file"
+
+    echo "[✓] Backup completed at $(date)" | tee -a "$log_file"
+}
+

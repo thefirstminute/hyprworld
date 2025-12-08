@@ -1,0 +1,12 @@
+#!/bin/sh
+# Go to common directories
+alias docs="cd $HOME/Documents && clear && l"
+alias dots="cd $HOME/dotfiles && clear && l"
+alias cfg="cd ~/.config && clear && l"
+alias media="cd /media/$USER && clear && l"
+alias apps="cd $HOME/Applications && clear && l"
+alias awd="cd $HOME/.config/awesome && clear && l"
+alias nvd="cd $HOME/.config/nvim && clear && l"
+alias hyd="cd $HOME/.config/hypr/ && clear && l"
+alias pyd="cd $HOME/Documents/pythons && clear && l"
+alias scripts="cd $HOME/.scripts/ && l"

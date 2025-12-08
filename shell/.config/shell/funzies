@@ -1,0 +1,101 @@
+#!/bin/sh
+
+### Random Welcome To The Terminal
+if command -v fortune &> /dev/null ; then
+  fortune -sn 50 | figlet -ct | lolcat
+fi
+
+### Leaving Is More Fun This Way
+if command -v cowsay &> /dev/null ; then
+  alias ray="cowsay -f `ls -1 /usr/share/cowsay/cows/ | sort -R | head -1` "
+  alias kow="cowsay -f `ls -1 /usr/share/cowsay/cows/kow*.cow | sort -R | head -1` "
+
+  RKOW=`ls -1 /usr/share/cowsay/cows/kow*.cow | sort -R | head -1`
+  # show which cow for troubleshoots: alias x="cowsay -f ${RKOW} \"bye bye\" | lolcat && echo 'kow: ${RKOW}' && sleep 2 && exit"
+  # alias x="clear & kow \"bye bye\" | lolcat && echo 'kow: ' ${RKOW} && sleep 3 && exit"
+  alias x="clear && kow \"bye bye\" | lolcat && sleep 2 && exit"
+  # alias x="exit"
+
+else
+  alias x="exit"
+fi
+
+
+## Give Examples Of Figlet / Toilet Fonts
+tofig() {
+  local text="${1:-Example}"
+
+  echo "=== FIGLET FONTS ==="
+  # Find all .flf font files in figlet’s font directory
+  for f in $(ls $(figlet -I2)/*.flf 2>/dev/null | xargs -n1 basename | sed 's/\.flf$//'); do
+    echo "figlet -f $f \"$text\""
+    figlet -f "$f" "$text"
+    echo
+  done
+
+  echo "=== TOILET FONTS ==="
+  # Toilet fonts are usually just files in its font dir
+  for f in $(ls $(toilet -I2)/ 2>/dev/null); do
+    echo "toilet -f $f \"$text\""
+    toilet -f "$f" "$text"
+    echo
+  done
+}
+
+### HeadLines:
+function hl() {
+  if [ -z "$1" ]; then
+    echo "Usage: hl <text> <font_letter>"
+    echo "Example: hl 'Hello World' l"
+    echo "Available fonts: [x]extra large, [l]arge, [m]edium, [s]mall, [w]ide, [sc]ript, [b]raille"
+    return
+  fi
+
+  case "$2" in
+    b)  toilet -f smbraille.tlf "$1" ;;
+    x)  toilet -f mono9.tlf "$1" ;;
+    l)  toilet -f smmono12.tlf "$1" ;;
+    m)  toilet -f smmono9.tlf "$1" ;;
+    s)  toilet -f smblock.tlf "$1" ;;
+    w)  toilet -f wideterm.tlf "$1" ;;
+    sc) figlet -f script "$1" ;;
+    *)  toilet -f future.tlf "$1" ;;
+  esac
+
+}
+
+
+# Print all 256 colors
+colours() {
+	local i
+	for i in {0..255}; do
+		printf "\x1b[38;5;${i}mcolor %d\n" "$i"
+	done
+	tput sgr0
+}
+
+# Calculate CPU load / Core Count
+cpu() {
+	node -p <<-EOF
+	var os = require('os');
+	var c = os.cpus().length;
+	os.loadavg().map(function(l) {
+		return (l/c).toFixed(2);
+	}).join(' ');
+	EOF
+}
+
+# Platform-independent memory usage
+ram() {
+	node <<-EOF
+	var os = require('os');
+	var free = os.freemem();
+	var total = os.totalmem();
+	var used = total - free;
+	console.log('memory: %dmb / %dmb (%d%%)',
+	    Math.round(used / 1024 / 1024),
+	    Math.round(total / 1024 / 1024),
+	    Math.round(used * 100 / total));
+	EOF
+}
+

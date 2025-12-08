@@ -1,0 +1,86 @@
+#!/bin/sh
+
+### Re-Source The RC:
+current_shell=$(ps -p $$ -o comm=)
+if [ "$current_shell" = "bash" ]; then
+  alias so="source ~/.bashrc && cd - && echo 'How Re-Source-Full'"
+elif [ "$current_shell" = "zsh" ]; then
+  alias so="source ~/.zshrc && cd - && echo 'How Re-Source-Full'"
+fi
+
+
+# Verboseify Commands
+alias \
+	cp="cp -iv" \
+	mv="mv -iv" \
+	rm="rm -vI"
+
+### My Shortened Commands
+alias \
+  b="cd -" \
+  v="vim" \
+  p="python3" \
+  x="exit" \
+  q="exit" \
+  cx="chmod u+x " \
+  fd="fdfind" \
+  rmr="rm -r" \
+  l="clear && eza -lhAGg --group-directories-first --color=always" \
+  lsd="clear && eza -lhAGgR -I '.git' --group-directories-first --color=always"
+
+
+### CDs
+alias \
+  ~="cd ~" \
+  ..="cd .. && l" \
+  ...="cd ../.. && l" \
+  ..3="cd ../../.. && l" \
+  ..4="cd ../../../.. && l" \
+  ..5="cd ../../../../.. && l"
+
+
+### Hyprland
+alias \
+  hc="hyprctl" \
+  clients="hyprctl clients | cat" \
+  reload="hyprctl reload"
+
+
+# Colorize commands
+alias \
+	ls="ls -hN --color=auto --group-directories-first" \
+	grep="grep --color=auto" \
+	diff="diff --color=auto" \
+	ccat="highlight --out-format=ansi" \
+	ip="ip -color=auto"
+
+
+### Replaced apps
+
+if command -v eza &> /dev/null; then
+  alias \
+    ls="eza"
+fi
+
+# Use neovim
+if command -v nvim &> /dev/null; then
+  alias \
+    v="nvim" \
+    vim="nvim" \
+    vimdiff="nvim -d"
+fi
+
+# Use bat
+if command -v bat &> /dev/null; then
+  alias cat="bat -pp --theme \"Visual Studio Dark+\"" 
+  alias catt="bat --theme \"Visual Studio Dark+\"" 
+fi
+
+# Use lazygit
+if command -v lazygit &> /dev/null; then
+  alias g="lazygit"
+else 
+  alias g="git"
+fi
+
+
