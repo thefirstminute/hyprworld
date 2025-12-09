@@ -53,29 +53,29 @@ help() {
 
 
 ### Quick Configs:
-function c {
-  if [ ! -n "$1" ]; then
+c() {
+  if [ -z "$1" ]; then
     cd ~/.config && l
-  elif [ "$1" == "h" ]; then
+  elif [ "$1" = "h" ]; then
     cd ~/.config/hypr && l
-  elif [ "$1" == "hs" ]; then
+  elif [ "$1" = "hs" ]; then
     cd ~/.config/hypr/scripts && l
-  elif [ "$1" == "a" ]; then
+  elif [ "$1" = "a" ]; then
     cd ~/.config/awesome && l
-  elif [ "$1" == "app" ]; then
+  elif [ "$1" = "app" ]; then
     cd ~/Applications && l
-  elif [ "$1" == "d" ]; then
+  elif [ "$1" = "d" ]; then
     cd ~/Documents && l
-  elif [ "$1" == "n" ]; then
+  elif [ "$1" = "n" ]; then
     cd ~/.config/nvim && l
-  elif [ "$1" == "r" ]; then
+  elif [ "$1" = "r" ]; then
     cd ~/.config/rofi && l
-  elif [ "$1" == "ak" ]; then
+  elif [ "$1" = "ak" ]; then
     cd /var/www/html/ak && l
-  elif [ "$1" == "w" ]; then
+  elif [ "$1" = "w" ]; then
     cd /var/www/html/ && l
   else
-    cd ~/.config/$1 && l
+    cd ~/.config/"$1" && l
   fi
 }
 
