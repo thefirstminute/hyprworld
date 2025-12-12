@@ -154,6 +154,7 @@ bindkey -M viins '^Y' copy-region-as-kill
 [ -f "$HOME/.config/shell/files" ] && source     "$HOME/.config/shell/files"
 [ -f "$HOME/.config/shell/functions" ] && source "$HOME/.config/shell/functions"
 [ -f "$HOME/.config/shell/arch" ] && source      "$HOME/.config/shell/arch"
+[ -f "$HOME/.config/shell/gitcmds" ] && source      "$HOME/.config/shell/gitcmds"
 [ -f "$HOME/.config/shell/funzies" ] && source   "$HOME/.config/shell/funzies"
 
 
