@@ -148,6 +148,45 @@ EOF
 }
 
 
+# copy command and output:
+function xc() {
+    CLIP_CMD="xclip -selection clipboard"
+
+    echo "--- Running: $* ---"
+    
+    local temp_out=$(mktemp)
+    
+    # 2. Run command, capture stdout/stderr to file and screen
+    "$@" 2>&1 | tee "$temp_out"
+    
+    # Check if the command actually ran successfully (optional)
+    # local exit_code=${PIPESTATUS[0]} 
+
+    # 3. Clean output (strip ANSI colors)
+    # We use sed to remove the color codes
+    local clean_output=$(cat "$temp_out" | sed 's/\x1b\[[0-9;]*m//g')
+    
+    # 4. Format Output
+    local full_copy="$ $*\n\n$clean_output"
+
+    # 5. Send to clipboard (USING EVAL TO FIX ZSH SPLITTING)
+    # 'eval' forces the shell to process the spaces in command arguments correctly
+    echo -e "$full_copy" | eval "$CLIP_CMD"
+
+    # Verify clipboard success (xclip/pbcopy return 0 on success)
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo "✅ Command and output copied to clipboard."
+    else
+        echo ""
+        echo "❌ Clipboard copy failed."
+    fi
+
+    # Cleanup
+    rm "$temp_out"
+}
+
+# Backup to my passport:
 bu() {
     local src="$PWD"
     local user=$(whoami)

@@ -11,7 +11,6 @@ compinit
 # ╹ ╹ ╹    ┗━╸┗━┛╹ ╹╹  ╹┗━┛┗━┛  #
 # # # # # # # # # # # # # # # # #
 export BROWSER="firefox"
-export EDITOR="nvim"
 export TERMINAL="kitty"
 export DATE=$(date "+%A, %B %e  %_I:%M%P")
 export FZF_DEFAULT_OPTS="--style minimal --color 16 --layout=reverse --height 30% --preview='bat -p --color=always {}'"
@@ -159,7 +158,6 @@ bindkey -M viins '^Y' copy-region-as-kill
 [ -f "$HOME/.config/shell/arch" ] && source      "$HOME/.config/shell/arch"
 [ -f "$HOME/.config/shell/gitcmds" ] && source      "$HOME/.config/shell/gitcmds"
 [ -f "$HOME/.config/shell/funzies" ] && source   "$HOME/.config/shell/funzies"
-
 
 
 
