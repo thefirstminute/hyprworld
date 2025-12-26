@@ -18,7 +18,10 @@ export FZF_DEFAULT_OPTS="--style minimal --color 16 --layout=reverse --height 30
 export FZF_CTRL_R_OPTS="--style minimal --color 16 --info inline --no-sort --no-preview" # separate opts for history widget
 export MANPAGER="less -R --use-color -Dd+r -Du+b" # colored man pages
 
+export PATH="$PATH:$HOME/.scripts/cmd"
 
+# Smart Case Search For Bat etc..
+export LESS="-I"
 
 unsetopt beep
 setopt autocd extendedglob nomatch
