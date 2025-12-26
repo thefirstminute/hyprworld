@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+TERMINAL=${TERMINAL:-kitty}
+# AUR_HELPER=$(command -v paru || command -v yay)
+
+kitty --title "PackageInstaller" bash -lc '
+{ pacman -Sl | awk "{print \$2 \" [repo]\"}"; yay -Sl aur | awk "{print \$2 \" [aur]\"}"; } |
+fzf --height 100% --layout=reverse --border \
+    --preview "pacman -Si {1} 2>/dev/null || yay -Si {1}" \
+    --preview-window down,60%,wrap |
+awk "{print \$1}" > /tmp/pkginstaller.selection
+
+SEL=$(cat /tmp/pkginstaller.selection 2>/dev/null || true)
+rm -f /tmp/pkginstaller.selection
+
+if [[ -n "$SEL" ]]; then
+  if pacman -Si "$SEL" &>/dev/null; then
+    sudo pacman -S --needed --noconfirm "$SEL"
+  else
+    yay -S --needed --noconfirm "$SEL"
+  fi
+fi
+
+echo "Press Enter to close"; read
+'

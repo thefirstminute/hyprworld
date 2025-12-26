@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+BIG=100
+BIGX=300
+BIGY=400
+
+NORMAL=2
+
+WS=$(hyprctl activeworkspace -j | jq '.id')
+CURRENT=$(hyprctl getoption "workspace:$WS/gaps_out" -j | jq '.int')
+
+if [ "$CURRENT" -lt "$BIG" ]; then
+    NEWX=$BIGX
+    NEWY=$BIGY
+else
+    NEWX=$NORMAL
+    NEWY=$NORMAL
+fi
+
+hyprctl keyword "workspace $WS gapsout $NEWX $NEWY"

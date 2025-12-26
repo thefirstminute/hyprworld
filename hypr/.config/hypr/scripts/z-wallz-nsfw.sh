@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# Path to wallpapers
-VERT_DIR="$HOME/.wallpapers/nsfw/v"
-HOR_DIR="$HOME/.wallpapers/nsfw/h"
-
 # 1. Define Paths
-WALL1="$HOME/.wallpapers/waifu/v/"
+WALL1="$HOME/.wallpapers/waifu/v"
 WALL2="$HOME/.wallpapers/waifu/h"
 WALL3="$HOME/.wallpapers/nsfw/h"
 VARS_FILE="$HOME/.config/hypr/vars.conf"
@@ -61,5 +57,3 @@ if command -v wal >/dev/null 2>&1; then
         waybar &
     fi
 fi
-
-

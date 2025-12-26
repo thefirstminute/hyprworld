@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Convert all .ai files to .svg
+for ai_file in *.ai; do
+    if [[ -f "$ai_file" ]]; then
+        svg_file="${ai_file%.ai}.svg"
+        inkscape "$ai_file" --export-type=svg --export-filename="$svg_file"
+        echo "Converted $ai_file to $svg_file"
+    else
+        echo "No .ai files found in the current directory."
+    fi
+done
+

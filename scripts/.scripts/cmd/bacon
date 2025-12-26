@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Check if a number was provided
+if [ -z "$1" ]; then
+  echo "Usage: bacon <number_of_paragraphs>"
+  exit 1
+fi
+
+# Fetch bacon ipsum
+curl -s "https://baconipsum.com/api/?type=meat-and-filler&paras=$1&start-with-lorem=1&format=text"
+
+echo -e "\n\n"

@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check for required dependencies
+MISSING_DEPS=()
+for dep in inotifywait wtype notify-send hyprctl jq; do
+    if ! command_exists "$dep"; then
+        MISSING_DEPS+=("$dep")
+    fi
+done
+
+if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+    echo "Error: Missing dependencies: ${MISSING_DEPS[*]}"
+    echo "Install them with: sudo pacman -S inotify-tools wtype libnotify hyprland jq"
+    exit 1
+fi
+
+# Directory to monitor (default to current directory if no argument provided)
+WATCH_DIR=${1:-$(pwd)}
+
+# Timeout: 5 hours in seconds
+TIMEOUT=$((5 * 60 * 60))  # 5 hours
+STOP_TIME=$(date -d "+5 hours" +"%I:%M %p")  # Human-readable stop time
+
+# Debounce time to prevent rapid refreshes (in seconds)
+DEBOUNCE_TIME=3
+
+# Exclude patterns (regex for directories/files to ignore, e.g., git, node_modules, logs)
+EXCLUDE_PATTERN="(\.git|node_modules|logs?|caches?|tmps?|\.swp|\.~)$"
+
+# Prompt for additional subdirectories to monitor (optional, space-separated)
+read -p "Enter subdirectories to monitor (space-separated, or press enter for none): " -a USER_SUBFOLDERS
+
+# Build list of paths to watch: main directory and valid subdirectories
+WATCH_PATHS=("$WATCH_DIR")
+for SUB in "${USER_SUBFOLDERS[@]}"; do
+    FULL_SUB="$WATCH_DIR/$SUB"
+    if [ -d "$FULL_SUB" ]; then
+        WATCH_PATHS+=("$FULL_SUB")
+    else
+        echo "Warning: $SUB is not a valid subdirectory, skipping..."
+    fi
+done
+
+# Exit if no valid paths
+if [ ${#WATCH_PATHS[@]} -eq 0 ]; then
+    echo "No valid paths to monitor. Exiting."
+    exit 1
+fi
+
+echo "Monitoring paths (recursive): ${WATCH_PATHS[*]}"
+echo "Excluding patterns: $EXCLUDE_PATTERN"
+echo "Refreshing until: $STOP_TIME"
+
+# Detect default URL based on directory (e.g., for web development)
+DEFAULT_LOCAL_HOST_PATH=$(echo "$WATCH_DIR" | sed 's|/var/www/html|http://localhost|; s|/srv/http|http://localhost|')
+if [[ "$DEFAULT_LOCAL_HOST_PATH" == "$WATCH_DIR" ]]; then
+    DEFAULT_LOCAL_HOST_PATH="http://localhost"
+fi
+
+# Prompt for URL to open in Firefox
+read -p "Enter URL to open in Firefox (default: $DEFAULT_LOCAL_HOST_PATH): " USER_URL
+LOCAL_HOST_PATH=${USER_URL:-$DEFAULT_LOCAL_HOST_PATH}
+
+# Check if Firefox is running; start it if not
+if ! pgrep "firefox" > /dev/null; then
+    echo "Firefox is not running..."
+    echo "Opening Firefox to $LOCAL_HOST_PATH"
+    MOZ_DISABLE_TELEMETRY=1 firefox "$LOCAL_HOST_PATH" &> /dev/null &
+    sleep 5  # Wait a bit for Firefox to start
+    
+    # Wait loop with timeout
+    COUNT=0
+    while ! pgrep "firefox" > /dev/null && [ $COUNT -lt 10 ]; do
+        sleep 1
+        COUNT=$((COUNT + 1))
+        echo "Waiting for Firefox to open... ($COUNT/10)"
+    done
+    
+    if ! pgrep "firefox" > /dev/null; then
+        echo "Error: Failed to start Firefox after 10 seconds."
+        exit 1
+    fi
+fi
+
+# Firefox window class (common on Wayland/Hyprland)
+FIREFOX_CLASS="firefox"
+
+# Start time for timeout
+START_TIME=$(date +%s)
+LAST_REFRESH=0
+
+echo "Refreshing Firefox on changes..."
+
+# Monitor for changes using inotifywait (recursive on each path, exclude patterns)
+inotifywait -m -r -e modify,create,delete,move --exclude "$EXCLUDE_PATTERN" "${WATCH_PATHS[@]}" --format '%w%f' | while read FILE; do
+    CURRENT_TIME=$(date +%s)
+    
+    # Check for timeout and auto-stop
+    if (( CURRENT_TIME - START_TIME >= TIMEOUT )); then
+        echo "Auto-stop: Reached $STOP_TIME."
+        notify-send "Firefox Auto-Refresh" "Stopped monitoring at $STOP_TIME."
+        exit 0
+    fi
+    
+    # Debounce: skip if refresh happened too recently
+    if (( CURRENT_TIME - LAST_REFRESH < DEBOUNCE_TIME )); then
+        continue
+    fi
+    
+    echo "Change detected: $FILE"
+    
+    # Get the current active window address
+    PREV_WINDOW=$(hyprctl activewindow -j | jq -r '.address')
+    
+    # Focus the Firefox window using hyprctl
+    if ! hyprctl dispatch focuswindow "class:$FIREFOX_CLASS"; then
+        echo "Warning: Failed to focus Firefox window."
+        continue
+    fi
+    sleep 0.1  # Very brief delay to ensure focus is set (reduced to minimize flicker)
+    
+    # Simulate F5 key press using wtype
+    if ! wtype -k F5; then
+        echo "Warning: Failed to send F5 key."
+        # Attempt to focus back even if send failed
+        hyprctl dispatch focuswindow "address:$PREV_WINDOW"
+        continue
+    fi
+    
+    # Focus back to the previous window
+    hyprctl dispatch focuswindow "address:$PREV_WINDOW"
+    
+    LAST_REFRESH=$CURRENT_TIME
+    notify-send "Firefox Auto-Refresh" "Refreshed due to change in $FILE"
+done

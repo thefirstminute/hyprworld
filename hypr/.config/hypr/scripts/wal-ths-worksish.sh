@@ -9,7 +9,6 @@ fi
 
 WALLPAPER_DIR="$HOME/.wallpapers"
 
-
 # Pick category via rofi
 category=$(ls "$WALLPAPER_DIR" | rofi -dmenu -p "Pick theme")
 if [ -z "$category" ]; then
@@ -18,26 +17,17 @@ if [ -z "$category" ]; then
 fi
 echo "Category: $category"
 
-# change the bar too?
-# yes or no, default to no:
-# change_bar=$( rofi -dmenu -p "Change bar? (y/n):" -kb-accept-entry "y,Y,n,N")
-change_bar=$(echo -e "yes\nno" | rofi -dmenu -p "Change bar?:" -auto-select)
-echo "Change bar: $change_bar"
-
-
 # Get focused monitor + resolution
 monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).name')
-rotation=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).transform')
+width=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).width')
+height=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).height')
 
 echo "Monitor: $monitor"
-echo "Rotation: ${rotation}"
+echo "Resolution: ${width}x${height}"
 
 # Orientation
 orient="h"
-# if rotation not 0 then vertical:
-if [ "$rotation" != "0" ]; then
-    orient="v"
-fi
+[ "$height" -gt "$width" ] && orient="v"
 echo "Orientation: $orient"
 
 # Pick random wallpaper
@@ -61,7 +51,7 @@ echo "Selected wallpaper: $wallpaper"
 
 if [ "$category" = "center" ]; then
     echo "Center wallpaper..."
-    bgcolor=$(magick "$wallpaper" -format "%[pixel:p{1,1}]" info:)
+    bgcolor=$(magick "$wallpaper" -format "%[pixel:p{2,2}]" info:)
 
     echo "bgcolor: $bgcolor"
 
@@ -108,16 +98,14 @@ if ! hyprctl hyprpaper wallpaper "$monitor,$wallpaper"; then
     exit 1
 fi
 
-if [ "$change_bar" == "yes" ]; then
-  # pywal set colors from wall paper:
-  if command -v wal >/dev/null 2>&1; then
-      wal -i "$wallpaper"
-      # Reload waybar
-      if command -v waybar >/dev/null 2>&1; then
-          pkill waybar
-          waybar &
-      fi
-  fi
-fi
+# # pywal set colors from wall paper:
+# if command -v wal >/dev/null 2>&1; then
+#     wal -i "$wallpaper"
+#     # Reload waybar
+#     if command -v waybar >/dev/null 2>&1; then
+#         pkill waybar
+#         waybar &
+#     fi
+# fi
 
 echo "Done."
