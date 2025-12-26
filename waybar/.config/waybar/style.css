@@ -58,6 +58,7 @@ window#waybar {
 #cpu,
 #tray,
 #memory,
+#custom-updates,
 #window,
 #mpris {
   padding: 0.3rem 0.6rem;
@@ -77,6 +78,10 @@ window#waybar {
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
     background-color: @urgent-color;
+}
+
+#custom-updates.urgent {
+  color: @urg;
 }
 
 #idle_inhibitor {

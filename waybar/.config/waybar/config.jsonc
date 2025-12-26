@@ -23,6 +23,7 @@
       "mpris",
       "pulseaudio",
       "network",
+      "custom/updates",
         // "keyboard-state",
       "tray"
     ],
@@ -122,6 +123,14 @@
         "default": ""
       }
     },
+
+    "custom/updates": {
+      "exec": "~/.config/hypr/scripts/updates-cachy.sh",
+      "interval": 600,
+      "return-type": "json",
+      "on-click": "kitty -e bash -c 'sudo pacman -Syu; exec bash'"
+    },
+
 
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
