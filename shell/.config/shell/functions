@@ -70,10 +70,12 @@ c() {
     cd ~/.config/nvim && l
   elif [ "$1" = "r" ]; then
     cd ~/.config/rofi && l
-  elif [ "$1" = "ak" ]; then
-    cd /var/www/html/ak && l
   elif [ "$1" = "w" ]; then
-    cd /var/www/html/ && l
+    cd /srv/http/ && l
+  elif [ "$1" = "ak" ]; then
+    cd /srv/http/ak && l
+  elif [ "$1" = "ds" ]; then
+    cd /srv/http/ak/dragonstrings && l
   else
     cd ~/.config/"$1" && l
   fi

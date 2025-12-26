@@ -42,7 +42,7 @@ alias \
 ### Hyprland
 alias \
   hc="hyprctl" \
-  clients="hyprctl clients | cat" \
+  clients="hyprctl clients | bat --style=numbers --color=always" \
   reload="hyprctl reload"
 
 
@@ -72,7 +72,8 @@ fi
 
 # Use bat
 if command -v bat &> /dev/null; then
-  alias cat="bat -pp --theme \"Visual Studio Dark+\"" 
+  alias cat="bat" 
+  alias catd="bat -pp --theme \"Visual Studio Dark+\"" 
   alias catt="bat --theme \"Visual Studio Dark+\"" 
 fi
 
