@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+if ! pgrep -x ydotoold > /dev/null; then
+    ydotoold --daemon --socket-path="$HOME/.ydotool_socket" &
+    export YDOTOOL_SOCKET="$HOME/.ydotool_socket"
+
+fi
+
+SNIPDIR="$HOME/Documents/snippets/rofi"
+
+# Build menu: filename → label (underscores → spaces)
+mapfile -t entries < <(
+  for f in "$SNIPDIR"/*; do
+    base="$(basename "$f")"
+    label="${base//_/ }"
+    printf "%s\n" "$label"
+  done | sort -f
+)
+
+# Show menu (case-insensitive by default)
+choice="$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Yank")"
+[ -z "$choice" ] && exit 0
+
+
+
+# Map label → original filename
+file="${choice// /_}"
+full="$SNIPDIR/$file"
+
+# Copy snippet to clipboard
+wl-copy < "$full"
+
+# Small pause to let focus return
+sleep 0.2
+
+## Apparently this is Ctrl+V:
+ydotool key 29:1 56:1 56:0 29:0
+
+##wl-paste | ydotool type --file -
+
+
+
+#### No Workies!?!!?
+# Type It In:
+##  snippet="$(cat "$full")"
+##  sleep 0.15   # let focus return
+##  ydotool type -- "$snippet"
+
+
+# Paste It In:
+##  wl-copy --clear < "$full"
+##  sleep 0.05
+##  ydotool key ctrl+v
+
+

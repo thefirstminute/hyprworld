@@ -1,0 +1,43 @@
+#!/bin/bash
+
+WP_BASE="$HOME/.wallpapers"
+SCRIPT="$HOME/.config/hypr/scripts/wall-show"
+MON=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).name')
+
+# Check if a slideshow is already running for this monitor
+PID_FILE="/tmp/hypr_wp_$MON.pid"
+if [ -f "$PID_FILE" ] && ps -p $(cat "$PID_FILE") > /dev/null; then
+    RUNNING=true
+else
+    RUNNING=false
+fi
+
+# Build Menu
+MENU=""
+[[ "$RUNNING" == "true" ]] && MENU="!!! STOP SLIDESHOW !!!\n"
+MENU+="$(find "$WP_BASE" -maxdepth 1 -mindepth 1 -type d -printf "%f\n")"
+
+# Show Rofi
+CHOICE=$(echo -e "$MENU" | rofi -dmenu -p "Select Folder (Enter for abstract)")
+
+# Handle Selection
+if [[ "$CHOICE" == "!!! STOP SLIDESHOW !!!" ]]; then
+    $SCRIPT stop
+    exit 0
+fi
+
+# If user cancels (ESC), exit
+[[ -z "$CHOICE" ]] && exit 0
+
+# Determine Folder Path
+if [[ "$CHOICE" == "abstract" || -z "$CHOICE" ]]; then
+    FOLDER="$WP_BASE/abstract"
+else
+    FOLDER="$WP_BASE/$CHOICE"
+fi
+
+# Ask for time
+TIME=$(rofi -dmenu -p "Seconds (Enter for 22m)")
+
+# Start it
+$SCRIPT "$TIME" "$FOLDER" &

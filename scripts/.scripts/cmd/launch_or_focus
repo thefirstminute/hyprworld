@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Usage: ./launch_focus.sh <regex> <command> [workspace]
+REGEX="$1"
+CMD="$2"
+WS="$3"
+
+# 1. Get window address and workspace ID in one JSON pass
+TARGET_DATA=$(hyprctl clients -j | jq -r ".[] | select(.class + .title + .initialTitle | test(\"$REGEX\"; \"i\")) | \"\(.address) \(.workspace.id)\"" | head -n 1)
+
+if [ -n "$TARGET_DATA" ]; then
+    # Window exists: Extract address and workspace ID
+    ADDR=${TARGET_DATA% *}
+    WID=${TARGET_DATA#* }
+    
+    # Focus workspace then window (using the correct --batch syntax)
+    hyprctl --batch "dispatch workspace $WID ; dispatch focuswindow address:$ADDR"
+else
+    # Window doesn't exist: Jump to target workspace (if provided) and launch
+    [ -n "$WS" ] && hyprctl dispatch workspace "$WS"
+    exec $CMD &
+fi

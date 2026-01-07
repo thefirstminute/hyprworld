@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Usage:
+# launch_or_focus.sh Identifier "command to launch"
+
+IDENT="$1"
+shift
+CMD="$@"
+
+# Find existing window by class OR title substring
+wid=$(qdbus org.kde.KWin /KWin org.kde.KWin.listWindows | while read -r w; do
+    info=$(qdbus org.kde.KWin /KWin org.kde.KWin.windowInfo "$w")
+    cls=$(echo "$info" | grep "resourceClass:" | awk '{print $2}')
+    title=$(echo "$info" | grep "caption:" | cut -d: -f2- | sed 's/^ //')
+
+    if [[ "$cls" == "$IDENT" ]] || [[ "$title" == *"$IDENT"* ]]; then
+        echo "$w"
+        break
+    fi
+done)
+
+if [[ -n "$wid" ]]; then
+    # Focus existing window
+    qdbus org.kde.KWin /KWin org.kde.KWin.activateWindow "$wid"
+else
+    # Launch new instance
+    eval "$CMD" &
+fi

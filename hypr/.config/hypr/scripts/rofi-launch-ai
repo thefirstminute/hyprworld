@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# --- Launch Or Find App ---
+lofa() {
+    local REGEX="$1"
+    local CMD="$2"
+    local WS="$3"
+
+    # Use jq to find window address and workspace ID
+    # This checks class, title, and initialTitle (case-insensitive)
+    local TARGET_DATA
+    TARGET_DATA=$(hyprctl clients -j | jq -r ".[] | select(.class + .title + .initialTitle | test(\"$REGEX\"; \"i\")) | \"\(.address) \(.workspace.id)\"" | head -n 1)
+
+    if [[ -n "$TARGET_DATA" ]]; then
+        local ADDR="${TARGET_DATA% *}"
+        local WID="${TARGET_DATA#* }"
+        hyprctl --batch "dispatch workspace $WID ; dispatch focuswindow address:$ADDR"
+    else
+        [[ -n "$WS" ]] && hyprctl dispatch workspace "$WS"
+        # Use setsid to fully detach the process from the script
+        setsid $CMD >/dev/null 2>&1 &
+    fi
+}
+
+# --- APP DEFINITIONS ---
+# Format: "Name|Regex|Command|Workspace"
+apps=(
+    "Copilot|Copilot|thorium-browser --app=https://copilot.microsoft.com|18"
+    "Perplexity|Perplexity|thorium-browser --app=https://perplexity.com|18"
+    "ChatGPT|ChatGPT|thorium-browser --app=https://chatgpt.com|18"
+    "Duck AI|Duck AI|thorium-browser --app=https://duck.ai|18"
+    "Gemini|gemini|thorium-browser --app=https://gemini.google.com|18"
+    "Grok|grok|thorium-browser --app=https://grok.com|18"
+    "Playground|OpenAI Playground|thorium-browser --app=https://platform.openai.com/examples|18"
+)
+
+# --- ROFI INTERFACE ---
+# Generate the list of names for Rofi
+choice=$(printf "%s\n" "${apps[@]}" | cut -d'|' -f1 | rofi -dmenu -p "AI Launcher" -i -matching fuzzy)
+
+# --- EXECUTION ---
+if [[ -n "$choice" ]]; then
+    # Extract the line matching the choice
+    selected_app=$(printf "%s\n" "${apps[@]}" | grep "^$choice|")
+
+    # Parse the fields
+    IFS='|' read -r name regex cmd ws <<< "$selected_app"
+
+    lofa "$regex" "$cmd" "$ws"
+fi

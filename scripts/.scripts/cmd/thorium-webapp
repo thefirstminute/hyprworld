@@ -1,0 +1,2 @@
+#!/bin/sh
+exec thorium-browser --window-size=765,765 --window-position=0,0 "$@"
