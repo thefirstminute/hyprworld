@@ -1,8 +1,0 @@
-#!/bin/bash
-TIMEOUT="4500"
-COLOR="rgb(d20f39)"
-
-# Format: "Current Time: Tuesday, November 25, 08:21 AM"
-CURRENT_DATE=$(date +"%A, %B %d | %I:%M %p ")
-
-hyprctl notify -1 "$TIMEOUT" "$COLOR" "fontsize:30 $CURRENT_DATE"

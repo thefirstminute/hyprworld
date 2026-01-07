@@ -20,7 +20,7 @@ while true; do
     ROT=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$MON\").transform")
     SUBDIR="h"
     [[ "$ROT" != "0" ]] && SUBDIR="v"
-    
+
     WP_PATH=$(find "$WP_ROOT/$SUBDIR" -type f 2>/dev/null | shuf -n 1)
 
     if [ -n "$WP_PATH" ]; then
@@ -31,3 +31,6 @@ while true; do
     fi
     sleep "$INTERVAL"
 done
+
+
+

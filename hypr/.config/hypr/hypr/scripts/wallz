@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # 1. Define Paths
-WALL1="$HOME/.wallpapers/waifu/v"
-WALL2="$HOME/.wallpapers/waifu/h"
-WALL3="$HOME/.wallpapers/nsfw/h"
+WALL1="$HOME/.wallpapers/safe/v"
+WALL2="$HOME/.wallpapers/safe/h"
+WALL3="$HOME/.wallpapers/safe/h"
 VARS_FILE="$HOME/.config/hypr/vars.conf"
 
 # 2. Extract Monitor Variables (using your cleaned up method)
@@ -15,7 +15,7 @@ eval "$(
 
 # 3.Check if hyprpaper running, if not, start it silently and disown it
 if ! pgrep -x "hyprpaper" > /dev/null; then
-    nohup hyprpaper >/dev/null 2>&1 & 
+    nohup hyprpaper >/dev/null 2>&1 &
     sleep 1
 fi
 
@@ -51,9 +51,16 @@ hyprctl hyprpaper wallpaper $monitor3, $RND3
 # pywal set colors from wall paper:
 if command -v wal >/dev/null 2>&1; then
     wal -i "$RND1"
+
+    # (cat ~/.cache/wal/colors-kitty.conf; echo 'background #2D2327') > ~/.cache/wal/colors-kitty.conf
+    # sed -i 's/^background[[:space:]]\+#.*/background   #2D2327/' ~/.cache/wal/colors-kitty.conf
+    sed -i 's/^background.*/background #2D2327/' ~/.cache/wal/colors-kitty.conf
+
+
     # Reload waybar
     if command -v waybar >/dev/null 2>&1; then
         pkill waybar
         waybar &
     fi
+
 fi

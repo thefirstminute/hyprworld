@@ -24,12 +24,10 @@ echo "Category: $category"
 change_bar=$(echo -e "yes\nno" | rofi -dmenu -p "Change bar?:" -auto-select)
 echo "Change bar: $change_bar"
 
-
 # Get focused monitor + resolution
 monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).name')
-rotation=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).transform')
-
 echo "Monitor: $monitor"
+rotation=$(hyprctl monitors -j | jq -r '.[] | select(.focused==true).transform')
 echo "Rotation: ${rotation}"
 
 # Orientation
@@ -58,6 +56,7 @@ if [ -z "$wallpaper" ]; then
     exit 1
 fi
 echo "Selected wallpaper: $wallpaper"
+
 
 if [ "$category" = "center" ]; then
     echo "Center wallpaper..."
@@ -92,21 +91,16 @@ if [ "$category" = "center" ]; then
     wallpaper=/tmp/wallpaper.png
 fi
 
-# Set wallpaper
-echo "Preloading wallpaper..."
-
+# (Optional: Unload all previous to free memory from old wallpapers)
 hyprctl hyprpaper unload all
 
-if ! hyprctl hyprpaper preload "$wallpaper"; then
-    echo "ERROR: preload failed."
-    exit 1
-fi
+# Set wallpaper
+echo "Preloading wallpaper..."
+hyprctl hyprpaper preload $wallpaper
 
 echo "Applying wallpaper to $monitor..."
-if ! hyprctl hyprpaper wallpaper "$monitor,$wallpaper"; then
-    echo "ERROR: wallpaper command failed."
-    exit 1
-fi
+hyprctl hyprpaper wallpaper $monitor, $wallpaper
+
 
 if [ "$change_bar" == "yes" ]; then
   # pywal set colors from wall paper:
