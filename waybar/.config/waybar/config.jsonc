@@ -5,7 +5,7 @@
   "layer": "top",
   "position": "bottom", // Waybar position (top|bottom|left|right)
   "spacing": 0, // Gaps between modules (4px)
-  "output": "DP-1",
+  "output": "DVI-D-1",
   "fixed-center": false,
 
     // Choose the order of the modules
