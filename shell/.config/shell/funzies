@@ -1,9 +1,9 @@
 #!/bin/sh
 
 ### Random Welcome To The Terminal
-if command -v fortune &> /dev/null ; then
-  fortune -sn 50 | figlet -ct | lolcat
-fi
+# if command -v fortune &> /dev/null ; then
+#   fortune -sn 50 | figlet -ct | lolcat
+# fi
 
 ### Leaving Is More Fun This Way
 if command -v cowsay &> /dev/null ; then

@@ -62,12 +62,12 @@ if command -v eza &> /dev/null; then
     ls="eza"
 fi
 
-# Use neovim
-if command -v nvim &> /dev/null; then
-  alias \
-    v="nvim" \
-    vimdiff="nvim -d"
-fi
+# # Use neovim
+# if command -v nvim &> /dev/null; then
+#   alias \
+#     v="nvim" \
+#     vimdiff="nvim -d"
+# fi
 
 # Use bat
 if command -v bat &> /dev/null; then

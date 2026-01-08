@@ -1,27 +1,19 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# The following lines were added by compinstall
+zstyle :compinstall filename '/home/jrk/.zshrc'
 
-source /usr/share/cachyos-zsh-config/cachyos-config.zsh
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
 
 # # # # # # # # # # # # # # # # #
 # ┏┳┓╻ ╻   ┏━╸┏━┓┏┓╻┏━╸╻┏━╸┏━┓  #
 # ┃┃┃┗┳┛   ┃  ┃ ┃┃┗┫┣╸ ┃┃╺┓┗━┓  #
 # ╹ ╹ ╹    ┗━╸┗━┛╹ ╹╹  ╹┗━┛┗━┛  #
 # # # # # # # # # # # # # # # # #
-setopt nocorrect
-
 export BROWSER="firefox"
 export TERMINAL="kitty"
 export DATE=$(date "+%A, %B %e  %_I:%M%P")
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
-export FZF_DEFAULT_OPTS="--style minimal --color 16 --layout=reverse --height 80% --preview='bat -p --color=always {}'"
+export FZF_DEFAULT_OPTS="--style minimal --color 16 --layout=reverse --height 30% --preview='bat -p --color=always {}'"
 export FZF_CTRL_R_OPTS="--style minimal --color 16 --info inline --no-sort --no-preview" # separate opts for history widget
 export MANPAGER="less -R --use-color -Dd+r -Du+b" # colored man pages
 
@@ -35,12 +27,22 @@ setopt autocd extendedglob nomatch
 
 # Load pywal colors
 [ -f ~/.cache/wal/colors.sh ] && source ~/.cache/wal/colors.sh
-#
-# Load wal colors for eza
-[ -f ~/.cache/wal/eza-colors ] && source ~/.cache/wal/eza-colors
 
-# export LS_COLORS
-export LS_COLORS="{{ ls_colors }}"
+# Enable colors and change prompt:
+autoload -U colors && colors	# Load colors
+# PS1="%B%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M %{$fg[magenta]%}%~%{$fg[red]%}]%{$reset_color%}$%b "
+# PS1="%{$fg[magenta]%}%~%{$reset_color%}$%b "
+
+NEWLINE=$'\n'
+icons=(     󰦥 󰔹   󰣉 󰮥 󰮦    󰀦 󰀧 󰀨 󰀩 󰀪  󰫶    󱟫    󰙌 󰯩 󰀄  󱂗 󱂘     󰢚 󰯉  󰼅      󰘍 󰞘 󰜴 󱞩 󱞪 󱞵  󰜶 󰹿     󰛂 󰶻 󰧣          󰋇 󱃱     󰭟     󱁕 󰖦 󰻈      󰚑 󱨛  󰠓     󰇷 󰱵   󰦫 󰬆)
+# Pick a random icon
+rand_index=$((RANDOM % ${#icons[@]}))
+ICON="%B%F{$color9}${icons[$rand_index]}%b%f"
+
+# Use it in your prompt
+# PROMPT="${NEWLINE}%K{$color0}%F{$color1}$(date +%_I:%M%P) %K{$color0}%F{$color2} %n %K{$color3} %~ %f%k ❯ " # pywal colors
+# PROMPT="%F{$color1}$(date +%_I:%M%P) %F{$color2} %n %F{$color7} %~ %f%k ${NEWLINE} %F{$color1}$%F{$cursor}" # pywal colors
+PROMPT="%F{$color2}%n %F{$color7} %~ %f%k ${NEWLINE} ${ICON} %F{$cursor}" # pywal colors
 
 
 ## History
@@ -61,9 +63,11 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_SPACE # Don't record an entry starting with a space.
 
+
+
 # Completion:
 zstyle ':completion:*' menu select # show & select completions
-# zstyle ':completion:*' special-dirs false # to show . and ..
+# zstyle ':completion:*' special-dirs false # to show . and .. 
 # zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} ma=0\;33 # colorize cmp menu
 # zstyle ':completion:*' file-list true # more detailed list
 # zstyle ':completion:*' squeeze-slashes false # explicit disable to allow /*/ expansion
@@ -73,16 +77,17 @@ setopt globdots # Include hidden files.
 setopt no_case_glob no_case_match # case insensitive
 setopt extended_glob # support more glob searches
 
+
+
 zmodload zsh/complist # gives me menuselect...and probably other stuff IDK
 
 # ctrl p/n to navigate previous commands
-bindkey '^p' up-line-or-history
+bindkey '^p' up-line-or-history 
 bindkey '^n' down-line-or-history
 
 # fzf setup
 source <(fzf --zsh) # allow for fzf history widget
 bindkey '^R' fzf-history-widget
-
 
 # # # # # # # # # # # # # # # # # # # #
 # ┏┳┓┏━┓╻┏ ┏━╸   ╻╺┳╸   ┏━╸┏━┓   ╻ ╻╻ #
@@ -118,7 +123,6 @@ zle -N zle-line-init
 echo -ne '\e[5 q' # Use beam shape cursor on startup.
 preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
-
 # Use vim keys in tab complete menu:
 bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
@@ -140,6 +144,7 @@ bindkey -M viins '^k' backward-kill-word
 bindkey -M viins '^Y' copy-region-as-kill
 
 
+
 # # # # # # # # # # # # # # # # # # #
 # ┏━┓╻ ╻┏━╸╻ ╻   ┏┓ ╻  ┏━┓┏━┓╺┳╸┏━┓ #
 # ┗━┓┃ ┃┃  ┣━┫   ┣┻┓┃  ┃ ┃┣━┫ ┃ ┗━┓ #
@@ -149,17 +154,10 @@ bindkey -M viins '^Y' copy-region-as-kill
 [ -f "$HOME/.config/shell/aliases" ] && source   "$HOME/.config/shell/aliases"
 [ -f "$HOME/.config/shell/dirs" ] && source      "$HOME/.config/shell/dirs"
 [ -f "$HOME/.config/shell/files" ] && source     "$HOME/.config/shell/files"
-# Prevent alias/function collisions
-unalias c 2>/dev/null
 [ -f "$HOME/.config/shell/functions" ] && source "$HOME/.config/shell/functions"
 [ -f "$HOME/.config/shell/arch" ] && source      "$HOME/.config/shell/arch"
-unalias gbd 2>/dev/null
-unalias gcm 2>/dev/null
-[ -f "$HOME/.config/shell/gitcmds" ] && source   "$HOME/.config/shell/gitcmds"
+[ -f "$HOME/.config/shell/gitcmds" ] && source      "$HOME/.config/shell/gitcmds"
 [ -f "$HOME/.config/shell/funzies" ] && source   "$HOME/.config/shell/funzies"
 
-cht() {
-    local languages=$(curl -s https://cheat.sh/:list)
-    local selection=$(echo "$languages" | fzf --preview "curl -s https://cheat.sh/{}")
-    [ -n "$selection" ] && curl -s "https://cheat.sh/$selection"
-}
+
+
