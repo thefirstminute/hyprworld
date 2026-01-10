@@ -36,6 +36,13 @@ function! ToggleComment()
         else
             let stripped = com . ' ' . stripped
         endif
+    elseif ft == 'lua'
+        let com = '--'
+        if stripped =~ '^' . com
+            let stripped = substitute(stripped, '^' . com . '\s*', '', '')
+        else
+            let stripped = com . ' ' . stripped
+        endif
     elseif ft == 'vim'
         let com = '"'
         if stripped =~ '^' . com
