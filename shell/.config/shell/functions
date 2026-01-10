@@ -52,6 +52,47 @@ help() {
 }
 
 
+# # Use neovim
+if command -v nvim &> /dev/null; then
+  nvims() {
+
+    items=("default")
+    items+=("nude")
+    for d in "$HOME/.config/.neovims"/*/; do
+      [[ -d "$d" ]] || continue
+      items+=("$(basename "$d")")
+    done
+
+    count=${#items[@]}
+    height=$((count + 6))
+
+    config=$(printf '%s\n' "${items[@]}" | fzf \
+      --prompt=" Neovim Config  " \
+      --border \
+      --border-label=" NVIM CONFIGS " \
+      --border-label-pos=top \
+      --height="$height" \
+      --margin=2,5 \
+      --padding=2 \
+      --no-multi \
+      --smart-case \
+      --no-preview \
+      --layout=reverse \
+      --exit-0)
+
+    [[ -z $config ]] && echo "Nothing selected" && return 0
+
+    if [[ $config == "default" ]]; then
+      NVIM_APPNAME="" nvim "$@"
+    elif [[ $config == "nude" ]]; then
+      nvim -u NONE -U NONE --noplugin "$@"
+    else
+      NVIM_APPNAME=".neovims/$config" nvim "$@"
+    fi
+  }
+fi
+
+
 ### Quick Configs:
 c() {
   if [ -z "$1" ]; then

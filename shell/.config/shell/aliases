@@ -19,14 +19,15 @@ alias \
 alias \
   b="cd -" \
   v="vim" \
-  p="python3" \
+  p="ps aux | grep" \
+  py="python3" \
   x="exit" \
   q="exit" \
   cx="chmod u+x " \
   fd="fdfind" \
   rmr="rm -r" \
-  l="clear && eza -lhAGg --group-directories-first --color=always" \
-  lsd="clear && eza -lhAGgR -I '.git' --group-directories-first --color=always"
+  l="clear && eza -lah --group-directories-first --color=always" \
+  lsd="clear && eza -lah -I '.git' --group-directories-first --color=always"
 
 
 ### CDs
@@ -62,24 +63,24 @@ if command -v eza &> /dev/null; then
     ls="eza"
 fi
 
-# # Use neovim
-# if command -v nvim &> /dev/null; then
-#   alias \
-#     v="nvim" \
-#     vimdiff="nvim -d"
-# fi
+# Use neovim
+if command -v nvim &> /dev/null; then
+alias \
+  nv="nvim" \
+  vimdiff="nvim -d"
+fi
 
 # Use bat
 if command -v bat &> /dev/null; then
-  alias cat="bat" 
-  alias catd="bat -pp --theme \"Visual Studio Dark+\"" 
-  alias catt="bat --theme \"Visual Studio Dark+\"" 
+  alias cat="bat"
+  alias catd="bat -pp --theme \"Visual Studio Dark+\""
+  alias catt="bat --theme \"Visual Studio Dark+\""
 fi
 
 # Use lazygit
 if command -v lazygit &> /dev/null; then
   alias g="lazygit"
-else 
+else
   alias g="git"
 fi
 
