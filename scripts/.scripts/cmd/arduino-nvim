@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -e
+
+cmd="$1"; shift
+
+case "$cmd" in
+  fqbn)
+    arduino-cli board list --format json | jq -r '.[0].boards[0].FQBN'
+    ;;
+  port)
+    arduino-cli board list --format json | jq -r '.[0].address'
+    ;;
+  compile)
+    arduino-cli compile --fqbn "$1" "$2"
+    ;;
+  upload)
+    arduino-cli upload -p "$1" --fqbn "$2" "$3"
+    ;;
+  monitor)
+    arduino-cli monitor -p "$1" -c baudrate=115200
+    ;;
+  *)
+    echo "unknown command"
+    exit 1
+    ;;
+esac
+
