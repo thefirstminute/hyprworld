@@ -158,8 +158,3 @@ unalias gcm 2>/dev/null
 [ -f "$HOME/.config/shell/gitcmds" ] && source   "$HOME/.config/shell/gitcmds"
 [ -f "$HOME/.config/shell/funzies" ] && source   "$HOME/.config/shell/funzies"
 
-cht() {
-    local languages=$(curl -s https://cheat.sh/:list)
-    local selection=$(echo "$languages" | fzf --preview "curl -s https://cheat.sh/{}")
-    [ -n "$selection" ] && curl -s "https://cheat.sh/$selection"
-}
