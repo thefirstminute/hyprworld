@@ -1,0 +1,29 @@
+#!/bin/bash
+
+PID_FILE="/tmp/hypr_wp_DP-1.pid"
+if [[ -f "$PID_FILE" ]] then
+  kill $(cat "$PID_FILE") 2>/dev/null
+  rm "$PID_FILE"
+fi
+
+PID_FILE="/tmp/hypr_wp_HDMI-A-1.pid"
+if [[ -f "$PID_FILE" ]] then
+  kill $(cat "$PID_FILE") 2>/dev/null
+  rm "$PID_FILE"
+fi
+
+PID_FILE="/tmp/hypr_wp_DVI-D-1.pid"
+if [[ -f "$PID_FILE" ]] then
+  kill $(cat "$PID_FILE") 2>/dev/null
+  rm "$PID_FILE"
+fi
+
+sleep 2
+
+hyprctl notify 5 5555 "rgb(d20f39)" "fontsize:40 Shutting Off Monitors!"
+
+sleep 4
+
+/home/$USER/.config/hypr/scripts/wallz.sh &
+
+sleep 4
