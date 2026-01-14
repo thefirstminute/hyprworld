@@ -328,6 +328,10 @@ inoremap ;r <C-r>
 
 " Placeholder Jumper:
 " {{{
+
+inoremap ;mc <++>
+nnoremap <Leader>mc i<++>
+
 " [ Move to Mark (next)] :
 inoremap ;mm <Esc>/<++><Enter>va<"_c
 inoremap <F4> <Esc>/<++><Enter>va<"_c
