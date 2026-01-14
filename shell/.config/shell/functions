@@ -54,7 +54,7 @@ help() {
 
 # # Use neovim
 if command -v nvim &> /dev/null; then
-  nvims() {
+  nv() {
 
     items=("default")
     items+=("nude")
@@ -64,7 +64,7 @@ if command -v nvim &> /dev/null; then
     done
 
     count=${#items[@]}
-    height=$((count + 6))
+    height=$((count + 16))
 
     config=$(printf '%s\n' "${items[@]}" | fzf \
       --prompt=" Neovim Config  " \
