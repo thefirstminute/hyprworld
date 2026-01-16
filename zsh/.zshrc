@@ -157,4 +157,3 @@ unalias gbd 2>/dev/null
 unalias gcm 2>/dev/null
 [ -f "$HOME/.config/shell/gitcmds" ] && source   "$HOME/.config/shell/gitcmds"
 [ -f "$HOME/.config/shell/funzies" ] && source   "$HOME/.config/shell/funzies"
-
