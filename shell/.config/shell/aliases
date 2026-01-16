@@ -26,8 +26,8 @@ alias \
   cx="chmod u+x " \
   fd="fdfind" \
   rmr="rm -r" \
-  l="clear && eza -lah --group-directories-first --color=always" \
-  lsd="clear && eza -lah -I '.git' --group-directories-first --color=always"
+  l="clear && eza --all --long --icons --group-directories-first" \
+  lsd="clear && eza --all --long --tree --icons --level 3"
 
 
 ### CDs
@@ -60,7 +60,7 @@ alias \
 
 if command -v eza &> /dev/null; then
   alias \
-    ls="eza"
+    ls="eza --all --long --icons"
 fi
 
 # Use neovim
