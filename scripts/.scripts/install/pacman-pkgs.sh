@@ -8,6 +8,7 @@ freecad
 freetube
 galculator
 git
+kitty
 lazygit
 luarocks
 neovim
@@ -21,6 +22,7 @@ thorium-browser-bin
 ttf-hack
 ttf-hack-nerd
 tumbler
+ueberzugpp
 unzip
 vifm
 waybar
