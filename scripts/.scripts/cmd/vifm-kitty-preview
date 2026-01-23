@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+Clear previous previews
+kitty +kitten icat --clear
+
+# Show current file if it's an image
+if file --mime-type "$1" | grep -qE 'image/(png|jpg|jpeg|gif|bmp|webp)'; then
+    kitty +kitten icat "$1"
+fi
+
+# file="$1"
+# px="$2"
+# py="$3"
+# pw="$4"
+# ph="$5"
+# 
+# # clear previous
+# kitty +kitten icat --clear
+# 
+# # only images
+# if file --mime-type "$file" | grep -qE 'image/(png|jpg|jpeg|gif|bmp|webp)'; then
+#   # place: WIDTHxHEIGHT+X+Y
+#   kitty +kitten icat --place "${pw}x${ph}+${px}+${py}" "$file"
+# fi
+
