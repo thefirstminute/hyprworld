@@ -6,6 +6,7 @@ MODE=$1
 
 echo
 echo "LAMP Stack Installer..."
+echo "Mode: $MODE"
 echo
 
 # List of packages to install/remove
@@ -35,13 +36,17 @@ if $EXISTING; then
     echo '---------------------------------------------'
     echo '---------------------------------------------'
     echo
-    read -p "Wipe and reinstall? (y/N): " confirm
+    read -p "Wipe Lamp? (y/N): " confirm
     if [[ ! "$confirm" =~ ^[yY]$ ]]; then
         echo "Exiting without changes."
         exit 0
     fi
 
-    sudo systemctl stop httpd mariadb --now
+    # Stop if  services are running
+
+    if [[ "$MODE" -ne "uninstall" ]]; then
+      sudo systemctl stop httpd mariadb --now
+    fi
     sudo pacman -Rsc --noconfirm "${INSTALLED[@]}"
 
     # sudo rm -rf /etc/httpd /etc/php /etc/webapps /var/lib/mysql /usr/share/webapps/phpMyAdmin
@@ -55,21 +60,27 @@ if $EXISTING; then
 
 fi
 
-read -p "DELETE /srv/http (y/N): " confirm
-if [[ "$confirm" =~ ^[yY]$ ]]; then
-  echo "Deleting /srv/http ..."
-  sudo rm -rf /srv/http
-  sleep 1
-fi
-sudo mkdir -p /srv/http
+# Check if /srv/http exists:
+if [ -d /srv/http ]; then
+  read -p "DELETE /srv/http (y/N): " confirm
+  if [[ "$confirm" =~ ^[yY]$ ]]; then
+    echo "Deleting /srv/http ..."
+    sudo rm -rf /srv/http
+    sleep 1
+  fi
+fi  
 
-# Make http editable by user:
-sudo chown -R "${USER}:http" /srv/http
-sudo chmod -R 775 /srv/http
-
-if [ "$MODE" == "uninstall" ]; then
+if [[ "$MODE" -eq "uninstall" ]]; then
+  echo "Uninstall complete."
+  echo "Exiting..."
   exit 0
 fi
+
+sudo mkdir -p /srv/http
+
+# Make http editable:
+sudo chown -R "${USER}:http" /srv/http
+sudo chmod -R 775 /srv/http
 
 
 # Update system and install packages
@@ -112,7 +123,7 @@ echo "MariaDB secured successfully."
 echo "Configuring PHP..."
 sudo sed -i 's/;extension=mysqli/extension=mysqli/' /etc/php/php.ini
 sudo sed -i 's/;extension=pdo_mysql/extension=pdo_mysql/' /etc/php/php.ini
-# Add more extensions if needed for phpMyAdmin (e.g., mbstring, gd are usually enabled by deps)
+# Add more extensions if needed for phpMyAdmin
 
 # Configure Apache for PHP
 echo "Configuring Apache to work with PHP..."
