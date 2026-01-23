@@ -10,10 +10,11 @@
 
     // Choose the order of the modules
     "modules-left": [
+      "clock",
+      "sep",
       "power-profiles-daemon",
       "idle_inhibitor",
       "sep",
-      "clock",
       "hyprland/workspaces"
     ],
     "modules-center": [
