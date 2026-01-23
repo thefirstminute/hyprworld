@@ -15,7 +15,7 @@ source /usr/share/cachyos-zsh-config/cachyos-config.zsh
 # ┃┃┃┗┳┛   ┃  ┃ ┃┃┗┫┣╸ ┃┃╺┓┗━┓  #
 # ╹ ╹ ╹    ┗━╸┗━┛╹ ╹╹  ╹┗━┛┗━┛  #
 # # # # # # # # # # # # # # # # #
-setopt nocorrect
+# setopt nocorrect
 
 export BROWSER="firefox"
 export TERMINAL="kitty"
@@ -62,6 +62,10 @@ setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_SPACE # Don't record an entry starting with a space.
 
 # Completion:
+# autoload -Uz compinit
+# compinit
+
+
 zstyle ':completion:*' menu select # show & select completions
 # zstyle ':completion:*' special-dirs false # to show . and ..
 # zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} ma=0\;33 # colorize cmp menu
