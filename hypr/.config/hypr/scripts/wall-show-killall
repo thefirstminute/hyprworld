@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PID_FILE="/tmp/hypr_wp_DP-1.pid"
 if [[ -f "$PID_FILE" ]] then
@@ -6,14 +6,17 @@ if [[ -f "$PID_FILE" ]] then
   rm "$PID_FILE"
 fi
 
+sleep 1
 PID_FILE="/tmp/hypr_wp_HDMI-A-1.pid"
 if [[ -f "$PID_FILE" ]] then
   kill $(cat "$PID_FILE") 2>/dev/null
   rm "$PID_FILE"
 fi
 
+sleep 1
 PID_FILE="/tmp/hypr_wp_DVI-D-1.pid"
 if [[ -f "$PID_FILE" ]] then
   kill $(cat "$PID_FILE") 2>/dev/null
   rm "$PID_FILE"
 fi
+

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+TERMINAL=${TERMINAL:-kitty}
+
+$TERMINAL --title "PacRemover" bash -lc '
+# list explicitly installed packages for selection
+PKGS=$(pacman -Qqe | fzf --height 100% --layout=reverse --border --multi \
+  --preview "pacman -Qi {} 2>/dev/null" --preview-window down,60%,wrap)
+
+# nothing selected -> exit
+if [ -z "$PKGS" ]; then
+  echo "No package selected."
+  read -r -p "Press Enter to close"
+  exit 0
+fi
+
+# show selection and confirm
+echo "Selected packages:"
+printf "%s\n" "$PKGS"
+read -r -p "Remove these packages? [y/N] " CONF
+if [[ "$CONF" =~ ^[Yy]$ ]]; then
+  # remove selected packages (safe: ask sudo to prompt)
+  printf "%s\n" "$PKGS" | xargs -r sudo pacman -Rcs
+fi
+
+read -r -p "Press Enter to close"
+'

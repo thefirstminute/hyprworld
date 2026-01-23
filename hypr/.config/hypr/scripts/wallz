@@ -1,10 +1,33 @@
 #!/bin/bash
 
+## Todo: pass params for setting wal & folders
+
+PID_FILE="/tmp/hypr_wp_DP-1.pid"
+if [[ -f "$PID_FILE" ]] then
+  kill $(cat "$PID_FILE") 2>/dev/null
+  rm "$PID_FILE"
+fi
+
+PID_FILE="/tmp/hypr_wp_HDMI-A-1.pid"
+if [[ -f "$PID_FILE" ]] then
+  kill $(cat "$PID_FILE") 2>/dev/null
+  rm "$PID_FILE"
+fi
+
+PID_FILE="/tmp/hypr_wp_DVI-D-1.pid"
+if [[ -f "$PID_FILE" ]] then
+  kill $(cat "$PID_FILE") 2>/dev/null
+  rm "$PID_FILE"
+fi
+
+
 # 1. Define Paths
 WALL1="$HOME/.wallpapers/safe/v"
 WALL2="$HOME/.wallpapers/safe/h"
 WALL3="$HOME/.wallpapers/safe/h"
 VARS_FILE="$HOME/.config/hypr/vars.conf"
+
+sleep 1
 
 # 2. Extract Monitor Variables (using your cleaned up method)
 eval "$(
