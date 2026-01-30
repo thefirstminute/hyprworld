@@ -8,6 +8,7 @@ freecad
 freetube
 galculator
 git
+hyprshot
 kitty
 lazygit
 luarocks
@@ -17,8 +18,9 @@ npm
 nwg-look
 pywal-git
 rofi
-thunar
+swappy
 thorium-browser-bin
+thunar
 ttf-hack
 ttf-hack-nerd
 tumbler
@@ -26,6 +28,7 @@ ueberzugpp
 unzip
 vifm
 waybar
+wl-clipboard
 zsh-autosuggestions
 zsh-completions
 zsh-syntax-highlighting

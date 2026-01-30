@@ -10,7 +10,7 @@ echo "Mode: $MODE"
 echo
 
 # List of packages to install/remove
-PACKAGES=("apache" "mariadb" "php" "php-apache" "phpmyadmin")
+PACKAGES=("apache" "mariadb" "php" "php-apache" "phpmyadmin" "php-gd")
 
 # Check for existing installation
 INSTALLED=()
@@ -43,13 +43,13 @@ if $EXISTING; then
     fi
 
     # Stop if  services are running
-
     if [[ "$MODE" -ne "uninstall" ]]; then
       sudo systemctl stop httpd mariadb --now
     fi
     sudo pacman -Rsc --noconfirm "${INSTALLED[@]}"
 
-    # sudo rm -rf /etc/httpd /etc/php /etc/webapps /var/lib/mysql /usr/share/webapps/phpMyAdmin
+    sudo rm -rf /etc/httpd /etc/php /etc/webapps /var/lib/mysql /usr/share/webapps/phpMyAdmin
+
     RM_DIRS="/etc/httpd /etc/php /etc/webapps /var/lib/mysql /usr/share/webapps/phpMyAdmin"
     for dir in $RM_DIRS; do
         if [ -d "$dir" ]; then
@@ -57,7 +57,6 @@ if $EXISTING; then
             sudo rm -rf "$dir"
         fi
     done
-
 fi
 
 # Check if /srv/http exists:
@@ -70,7 +69,7 @@ if [ -d /srv/http ]; then
   fi
 fi  
 
-if [[ "$MODE" -eq "uninstall" ]]; then
+if [ "$MODE" = "uninstall" ]; then
   echo "Uninstall complete."
   echo "Exiting..."
   exit 0
@@ -95,27 +94,31 @@ sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 sudo systemctl enable --now mariadb
 echo "MariaDB started successfully."
 
-# Secure MariaDB installation (automated equivalent of mysql_secure_installation)
-echo "Now, we'll secure your MariaDB installation."
-echo "For local development, we'll remove anonymous users, disallow remote root login, remove test database, and set a root password."
-read -s -p "Enter a secure password for the MySQL root user: " rootpass
-echo
-read -s -p "Confirm password: " rootpass_confirm
-echo
-if [ "$rootpass" != "$rootpass_confirm" ]; then
-    echo "Passwords do not match. Aborting."
-    exit 1
-fi
+### # Secure MariaDB installation (automated equivalent of mysql_secure_installation)
+#  - - - - - - - - - - - - - -  This Fails  - - - - - - - - - - - - - -  {{{
+### echo "Now, we'll secure your MariaDB installation."
+### echo "For local development, we'll remove anonymous users, disallow remote root login, remove test database, and set a root password."
+### read -s -p "Enter a secure password for the MySQL root user: " rootpass
+### echo
+### read -s -p "Confirm password: " rootpass_confirm
+### echo
+### if [ "$rootpass" != "$rootpass_confirm" ]; then
+###     echo "Passwords do not match. Aborting."
+###     exit 1
+### fi
+### 
+### # Apply security settings
+### sudo /usr/bin/mariadb -u root <<EOF
+### SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpass');
+### DELETE FROM mysql.user WHERE User='';
+### DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+### DROP DATABASE IF EXISTS test;
+### DELETE FROM mysql.db WHERE Db='test' OR Db='test_%';
+### FLUSH PRIVILEGES;
+### EOF
+#  - - - - - - - - - - - - - -  This Fails  - - - - - - - - - - - - - -  }}}
 
-# Apply security settings
-sudo /usr/bin/mariadb -u root <<EOF
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpass');
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test_%';
-FLUSH PRIVILEGES;
-EOF
+sudo mysql_secure_installation
 
 echo "MariaDB secured successfully."
 
