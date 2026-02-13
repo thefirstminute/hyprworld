@@ -1,0 +1,37 @@
+#!/bin/bash
+# Usage: howto php foreach
+
+# The ?T suffix tells cheat.sh to return plain text without ANSI codes
+QUERY=$(echo "$*" | tr ' ' '/')
+
+cht.sh "${QUERY}?T" | tr -d '\r' | sed 's/[[:space:]]*$//' | vim -R - \
+    -c "set buftype=nofile bufhidden=hide noswapfile ft=markdown" \
+    -c "nnoremap <buffer> q :q!<CR>" \
+    -c "normal! gg"
+
+
+## # Usage: howto php foreach
+##
+## # Join arguments with a dot or slash to match file paths
+## QUERY=$(echo "$*" | tr ' ' '/')
+## BASE_DIR="$HOME/Documents/cheat-sheets"
+##
+## # 1. Get the language/tool from the first argument or fzf
+## if [ -z "$1" ]; then
+##     TARGET=$(find "$BASE_DIR" -type f -not -path '*/.*' | sed "s|$BASE_DIR/||" | fzf --preview "cat $BASE_DIR/{}")
+## else
+##     TARGET=$(find "$BASE_DIR" -type f -not -path '*/.*' | sed "s|$BASE_DIR/||" | grep -i "$1" | head -n 1)
+## fi
+##
+## [ -z "$TARGET" ] && exit 1
+##
+## # 2. Shift the arguments to get the search keywords (e.g., "foreach")
+## shift
+## KEYWORDS="$*"
+##
+## # 3. Open in Vim. If keywords exist, jump to the first match.
+## if [ -n "$KEYWORDS" ]; then
+##     nvim -R -c "set ft=markdown" -c "/$KEYWORDS" "$BASE_DIR/$TARGET"
+## else
+##     nvim -R -c "set ft=markdown" "$BASE_DIR/$TARGET"
+## fi

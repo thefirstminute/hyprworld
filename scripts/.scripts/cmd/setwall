@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# set -euo pipefail
+
+IMG="$1"
+MON="$2"
+CLR="$3"
+
+
+# make sure hyprpaper is running
+if ! pgrep -x "hyprpaper" > /dev/null; then
+    nohup hyprpaper >/dev/null 2>&1 & 
+    sleep 2
+fi
+
+# Validate file exists
+[ -f "$IMG" ] || { echo "Not a file: $IMG"; exit 1; }
+
+# Validate it's an image
+mime=$(file --mime-type -b "$IMG")
+case "$mime" in
+  image/*) ;;  # OK
+  *) echo "Not an image: $IMG ($mime)"; exit 1 ;;
+esac
+
+echo "Setting wallpaper to: $IMG"
+
+
+case "$MON" in
+  2) MONITOR="DP-1" ;;
+  3) MONITOR="HDMI-A-1" ;;
+  *) MONITOR="DVI-D-1" ;;
+esac
+
+echo "Unloading wallpaper..."
+hyprctl hyprpaper unload all
+
+# Set IMG
+echo "Preloading wallpaper..."
+hyprctl hyprpaper preload $IMG
+
+echo "Applying wallpaper to $MONITOR..."
+hyprctl hyprpaper wallpaper $MONITOR, $IMG
+
+
+if [ -n "$CLR" ]; then
+  # pywal set colors from wall paper:
+  if command -v wal >/dev/null 2>&1; then
+      wal -i "$IMG"
+      # Reload waybar
+      if command -v waybar >/dev/null 2>&1; then
+          pkill waybar
+          waybar & disown
+          exit 0
+      fi
+  fi
+fi
+
+echo "Done."
+

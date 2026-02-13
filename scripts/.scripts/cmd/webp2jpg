@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+for f in *.webp; do
+    [ -e "$f" ] || continue
+
+    out="${f%.webp}.jpg"
+    [ -e "$out" ] && continue
+
+    magick "$f" "$out"
+done
+
