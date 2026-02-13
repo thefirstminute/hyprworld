@@ -9,6 +9,7 @@ freetube
 galculator
 git
 hyprshot
+hyprpicker
 kitty
 lazygit
 luarocks
