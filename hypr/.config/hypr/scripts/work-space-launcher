@@ -6,6 +6,7 @@ case "$WS" in
   12) exec filezilla ;;
   13) exec kitty -d /srv/http ;;
   14) exec firefox ;;
+  15) exec vivaldi ;;
   19) exec Telegram ;;
   *) exec rofi -show combi -modes combi -combi-modes "window,drun"
 esac
