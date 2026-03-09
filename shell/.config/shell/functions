@@ -55,12 +55,16 @@ help() {
 # # Use neovim
 if command -v nvim &> /dev/null; then
   nv() {
-
     items=("default")
     items+=("nude")
+
+    # Get all nvim config directory names, exclude hidden files:
+    # NOT full path, just name.
     for d in "$HOME/.config/.neovims"/*/; do
       [[ -d "$d" ]] || continue
-      items+=("$(basename "$d")")
+      ### exclude hidden files
+      [[ $(basename "$d") == .* ]] && continue
+        items+=("$(basename "$d")")
     done
 
     count=${#items[@]}
@@ -188,25 +192,67 @@ EOF
     | xargs -r nvim
 }
 
+# Start everything and jump into Vim
+www() {
+  cd ~/dev/www || return
+
+  # Check if the "www" project has any running containers
+  if [ -z "$(docker compose ps -q --status running)" ]; then
+    echo "--- STARTING LAMP STACK ---"
+    docker compose up -d
+    # ~/bin/wwatch &
+  else
+    echo "--- LAMP STACK ALREADY ACTIVE ---"
+  fi
+
+  # Always drop into nvim in the correct directory
+  cd public_html
+}
+
+# Stop and clean up memory
+wwwStop() {
+    cd ~/dev/www || return
+
+    echo "--- STOPPING LAMP STACK ---"
+    docker compose stop
+
+    # Kills any process named wwatch
+    # pkill -f wwatch
+    echo "---  Lamp Stopped  ---"
+
+    # Gracefully close windows by their WM_CLASS
+    # -x matches the class, -c closes the window
+    echo "--- Closing Floorp --"
+    wmctrl -x -c floorp
+    sleep 1
+    echo "--- Closing Filezilla --"
+    wmctrl -x -c filezilla.FileZilla
+
+    echo
+    echo "---    Bye Bye   ---"
+    sleep 3
+
+    exit
+}
 
 # copy command and output:
 function xc() {
     CLIP_CMD="xclip -selection clipboard"
 
     echo "--- Running: $* ---"
-    
+
     local temp_out=$(mktemp)
-    
+
     # 2. Run command, capture stdout/stderr to file and screen
     "$@" 2>&1 | tee "$temp_out"
-    
+
     # Check if the command actually ran successfully (optional)
-    # local exit_code=${PIPESTATUS[0]} 
+    # local exit_code=${PIPESTATUS[0]}
 
     # 3. Clean output (strip ANSI colors)
     # We use sed to remove the color codes
     local clean_output=$(cat "$temp_out" | sed 's/\x1b\[[0-9;]*m//g')
-    
+
     # 4. Format Output
     local full_copy="$ $*\n\n$clean_output"
 

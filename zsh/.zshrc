@@ -1,6 +1,10 @@
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
+
+typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
+
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -65,7 +69,6 @@ setopt HIST_IGNORE_SPACE # Don't record an entry starting with a space.
 # autoload -Uz compinit
 # compinit
 
-
 zstyle ':completion:*' menu select # show & select completions
 # zstyle ':completion:*' special-dirs false # to show . and ..
 # zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} ma=0\;33 # colorize cmp menu
@@ -88,6 +91,7 @@ source <(fzf --zsh) # allow for fzf history widget
 bindkey '^R' fzf-history-widget
 
 
+
 # # # # # # # # # # # # # # # # # # # #
 # ┏┳┓┏━┓╻┏ ┏━╸   ╻╺┳╸   ┏━╸┏━┓   ╻ ╻╻ #
 # ┃┃┃┣━┫┣┻┓┣╸    ┃ ┃    ┃╺┓┃ ┃   ┃┏┛┃ #
@@ -96,8 +100,8 @@ bindkey '^R' fzf-history-widget
 
 bindkey -v
 export KEYTIMEOUT=1
-export EDITOR=vim
-export VISUAL=vim
+export EDITOR=nvim
+export VISUAL=nvim
 
 
 # take selection to vim buffer:
@@ -161,3 +165,23 @@ unalias gbd 2>/dev/null
 unalias gcm 2>/dev/null
 [ -f "$HOME/.config/shell/gitcmds" ] && source   "$HOME/.config/shell/gitcmds"
 [ -f "$HOME/.config/shell/funzies" ] && source   "$HOME/.config/shell/funzies"
+
+# stop showing user@host in title:
+# unset -f title 2>/dev/null
+# precmd() { print -Pn "\e]0;%~\a" }
+
+# prevent P10K warning
+() {
+  emulate -L zsh
+  setopt no_unset
+  functions -u p10k-on-precmd 2>/dev/null
+  functions -u p10k-on-preexec 2>/dev/null
+  functions -u title 2>/dev/null
+}
+
+# precmd() { print -Pn "\e]0;%~\a" }
+
+precmd() {
+  print -Pn "\e]0;${PWD:t} — $1\a"
+}
+

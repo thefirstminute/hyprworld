@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+focused_mon=$(hyprctl activeworkspace -j | jq -r '.monitor')
+
+case $focused_mon in
+    "DVI-D-1") display_id=1 ;;
+    "HDMI-A-1") display_id=2 ;;
+    "DP-1") display_id=3 ;;
+    *) exit 1 ;;
+esac
+
+# Immediate Feedback (Visual "Handshake")
+# hyprctl notify 5 2200 "rgb(d20f39)"  "Adjusting $focused_mon..." -h int:value:0
+hyprctl notify 5 2200 "rgb(d20f39)" "Adjusting $focused_mon..."
+
+# Apply the Change
+ddcutil --display "$display_id" setvcp 10 "$1" "$2"
+
+# Fetch the New Level for the Notification
+new_val=$(ddcutil --display "$display_id" getvcp 10 -t | cut -d' ' -f4)
+
+# Final Notification Update
+hyprctl notify 5 2200 "rgb(d20f39)" "New Level Set: $new_val"

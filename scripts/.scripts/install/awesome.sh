@@ -4,10 +4,15 @@ PACKAGES="
 arandr
 awesome
 feh
+inotify-tools
+libnotify
 lxappearance
 lxsession
+notify-send
+pacman-contrib
 picom
 rofi
+xdotool
 xorg-server
 xorg-xinit
 xorg-xrandr

@@ -390,6 +390,12 @@ vnoremap p "_dP
 " file save
 nnoremap <Leader>fs :w<CR>:echo "File Saved"<CR>
 
+augroup WriteForWebFiles
+  autocmd!
+  autocmd FileType php,html,css nnoremap <leader>fs :w<CR>:silent !~/dev/www/qutebrowser-reload &<CR>:redraw!<CR>:echo "Reloaded"<CR>
+augroup END
+
+
 " Set working directory to current file path
 nnoremap <leader>wd :lcd %:p:h<CR>
 

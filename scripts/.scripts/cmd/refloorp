@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Dependencies: inotify-tools, xdotool, notify-send, libnotify
+
+# Stop after 4 hours:
+TIMEOUT=$((4 * 60 * 60))
+STOP_TIME=$(date -d "+4 hours" +"%I:%M %p")
+
+WATCH_DIR=${1:-$(pwd)}  # Default to current directory
+read -p "Enter subdirectories to monitor (space-separated, or press enter for none): " -a USER_SUBFOLDERS
+
+WATCH_PATHS=("$WATCH_DIR")
+# Add valid subdirectories
+for SUB in "${USER_SUBFOLDERS[@]}"; do
+  if [ -d "$WATCH_DIR/$SUB" ]; then
+    WATCH_PATHS+=("$WATCH_DIR/$SUB")
+  else
+    echo "Warning: $SUB is not a valid directory, skipping..."
+  fi
+done
+
+echo "Monitoring: ${WATCH_PATHS[*]}"
+echo "Refreshing until: $STOP_TIME"
+
+# Exit if nothing is being watched (shouldn't happen)
+if [ ${#WATCH_PATHS[@]} -eq 0 ]; then
+  echo "No valid paths to monitor. Exiting."
+  exit 1
+fi
+
+# Ensure floorp is running
+if ! pgrep "floorp" > /dev/null; then
+  echo "floorp is not running..."
+  MOZ_DISABLE_TELEMETRY=1 floorp "localhost" &> /dev/null &
+  sleep 3
+  while ! pgrep "floorp" > /dev/null; do
+    sleep 0.5
+    echo "Waiting for floorp to open..."
+  done
+fi
+
+WINDOW_CLASS="floorp"
+echo "Refreshing floorp on changes..."
+
+START_TIME=$(date +%s)
+LAST_REFRESH=0
+DEBOUNCE_TIME=1  # Prevents rapid refresh spam
+
+# Monitor files (without recursion)
+inotifywait -m -e modify,create,delete,move "${WATCH_PATHS[@]}" --format '%w%f' | while read FILE; do
+  CURRENT_TIME=$(date +%s)
+
+  # Auto-exit at the exact stop time
+  if (( CURRENT_TIME - START_TIME >= TIMEOUT )); then
+    echo "Auto-stop: Reached $STOP_TIME."
+    notify-send "floorp Auto-Refresh" "Stopped monitoring at $STOP_TIME."
+    exit 0
+  fi
+
+  # Prevent excessive refreshes
+  if (( CURRENT_TIME - LAST_REFRESH < DEBOUNCE_TIME )); then
+    continue
+  fi
+
+  echo "Change detected: $FILE"
+  for id in $(xdotool search --class floorp); do
+    if xprop -id "$id" _NET_WM_WINDOW_TYPE | grep -q "_NET_WM_WINDOW_TYPE_NORMAL"; then
+      xdotool key --window "$id" F5
+      break
+    fi
+  done
+
+  LAST_REFRESH=$CURRENT_TIME
+
+done
+

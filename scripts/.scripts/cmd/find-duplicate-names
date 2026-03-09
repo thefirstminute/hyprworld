@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+declare -A seen
+for file in *.*; do
+    [[ -e "$file" ]] || continue
+    base="${file%.*}"
+    seen["$base"]+="$file "
+done
+
+for base in "${!seen[@]}"; do
+    # If the string contains a space (meaning more than one file), it's a duplicate
+    files=(${seen[$base]})
+    if [ ${#files[@]} -gt 1 ]; then
+        echo "Duplicates for '$base': ${files[*]}"
+    fi
+done

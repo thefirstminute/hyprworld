@@ -3,9 +3,9 @@
 ### Re-Source The RC:
 current_shell=$(ps -p $$ -o comm=)
 if [ "$current_shell" = "bash" ]; then
-  alias so="source ~/.bashrc && cd - && echo 'How Re-Source-Full'"
+  alias so="source ~/.bashrc && echo 'How Re-Source-Full'"
 elif [ "$current_shell" = "zsh" ]; then
-  alias so="source ~/.zshrc && cd - && echo 'How Re-Source-Full'"
+  alias so="source ~/.zshrc && echo 'How Re-Source-Full'"
 fi
 
 

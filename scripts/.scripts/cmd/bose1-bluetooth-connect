@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# My Bose QC ID
+DEVICE_MAC="BC:87:FA:23:5F:63"
+
+###  send: urgency, message
+notify() {
+  notify-send -u $1 -i /usr/share/icons/Adwaita/scalable/devices/audio-headset.svg "Bose Headphones..." "$2"
+}
+
+notify "low" "Checking"
+
+is_connected() {
+    bluetoothctl info "$DEVICE_MAC" | grep -q "Connected: yes"
+}
+
+if is_connected; then
+    bluetoothctl disconnect "$DEVICE_MAC" >/dev/null 2>&1
+    notify "normal" "Disconnecting"
+else
+    bluetoothctl connect "$DEVICE_MAC" >/dev/null 2>&1
+
+    # After connect, verify success before switching audio.
+    if is_connected; then
+        pactl set-card-profile "bluez_card.$DEVICE_MAC" "a2dp-sink" >/dev/null 2>&1
+        notify "normal" "Connected"
+    else
+        notify "critical" "Connection Failed"
+    fi
+fi
+
+exit 0

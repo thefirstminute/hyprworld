@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# --------------------------------------------
+declare -A contacts
+contacts=(
+    ["Wife"]="5551112222"
+    ["Mom"]="5553334444"
+    ["Dad"]="5558889999"
+    ["Bruno"]="2896882363"
+)
+# --------------------------------------------
+
+deviceid=$(kdeconnect-cli -l --id-only | head -n 1)
+
+hyprctl notify 5 7200 "rgb(d20f39)" "This No Workie ID: $deviceid"
+exit 0
+
+
+if [ -z "$deviceid" ]; then
+    hyprctl notify 5 4200 "rgb(d20f39)" "No phone found! Check Wi-Fi/Firewall."
+    exit 1
+fi
+
+contact=$(printf "%s\n" "${!contacts[@]}" | wofi --dmenu --prompt "Text who?")
+
+# Escape:
+[ -z "$contact" ] && exit 0
+
+number=${contacts[$contact]}
+
+message=$(echo "" | wofi --dmenu --prompt "Message to $contact:")
+
+# Exit if no message
+[ -z "$message" ] && exit 0
+
+kdeconnect-cli -d "$deviceid" --send-sms "$message" --destination "$number"
+
+hyprctl notify 5 4200 "rgb(d20f39)" "SMS Sent To: $contact"

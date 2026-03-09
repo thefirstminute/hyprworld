@@ -12,7 +12,7 @@ if [ -n "$TARGET_DATA" ]; then
     # Window exists: Extract address and workspace ID
     ADDR=${TARGET_DATA% *}
     WID=${TARGET_DATA#* }
-    
+
     # Focus workspace then window (using the correct --batch syntax)
     hyprctl --batch "dispatch workspace $WID ; dispatch focuswindow address:$ADDR"
 else

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# Default size
+SIZE="250"
+count=0
+
+usage() {
+    echo "Usage: web-thumbnail.sh [SIZE]"
+    echo "Creates web-optimized JPG thumbnails in ./thumbnails/"
+    echo "Default size is $SIZE px (max width or height)."
+    exit 0
+}
+
+if [[ "$1" == "-h" ]]; then usage; fi
+
+# Use provided argument as size if it exists
+if [[ -n "$1" ]]; then
+    SIZE="$1"
+fi
+
+mkdir -p thumbnails
+
+for file in *; do
+    [[ -e "$file" ]] || continue
+    [[ -d "$file" ]] && continue
+
+    # Target filename (always .jpg for web optimization)
+    target="thumbnails/${file%.*}.jpg"
+
+    # Check if it's an image and if thumbnail already exists
+    if magick identify "$file" >/dev/null 2>&1; then
+        if [[ ! -e "$target" ]]; then
+            ((count++))
+            printf "\rCreating thumbnail #$count: %s...\e[K" "$file"
+
+            # Create optimized thumbnail
+            # Using $SIZE x $SIZE with '>' ensures it only shrinks, never enlarges
+            magick "$file" -resize "${SIZE}x${SIZE}>" -sampling-factor 4:2:0 -strip -quality 80 -interlace JPEG -colorspace sRGB "$target"
+        fi
+    fi
+done
+
+printf "\rFinished! %d thumbnails created in ./thumbnails/\e[K\n" "$count"

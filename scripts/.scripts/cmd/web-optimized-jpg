@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Default values
+MAX_W=""
+MAX_H=""
+RESIZE_ARG=""
+I=0
+C=0
+
+# Help menu
+usage() {
+  echo "Usage: web_jpg.sh [MAX_WIDTH] [MAX_HEIGHT]"
+  echo "Converts images in current directory to web-optimized JPGs."
+  echo "Originals are moved to ./originals/"
+  echo ""
+  echo "Options:"
+  echo "  MAX_WIDTH   (Optional) Maximum width in pixels."
+  echo "  MAX_HEIGHT  (Optional) Maximum height. If width is set but height isn't, height = width."
+  echo "  -h          Show this help message."
+  exit 0
+}
+
+if [[ "$1" == "-h" ]]; then usage; fi
+
+# Set dimensions
+if [[ -n "$1" ]]; then
+  MAX_W="$1"
+  MAX_H="${2:-$1}"
+  RESIZE_ARG="-resize ${MAX_W}x${MAX_H}>"
+fi
+
+mkdir -p originals
+
+for file in *; do
+  [[ -e "$file" ]] || continue
+  [[ -d "$file" ]] && continue
+
+  # Check if file is an image and not already in originals
+  if magick identify "$file" >/dev/null 2>&1; then
+    ((I++))
+    printf "\rProcessing image: $file...\e[K"
+    sleep 0.1
+    if [[ ! -e "originals/$file" ]]; then
+      ((C++))
+      target="${file%.*}.jpg"
+
+      # Use magick for web optimization
+      magick "$file" $RESIZE_ARG -sampling-factor 4:2:0 -strip -quality 85 -interlace JPEG -colorspace sRGB "tmp_$target"
+
+      mv "$file" originals/
+      mv "tmp_$target" "$target"
+    fi
+  fi
+done
+printf "\n"
+
+echo "$I files found :: converted $C"
