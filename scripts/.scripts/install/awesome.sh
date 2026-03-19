@@ -1,16 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PACKAGES="
 arandr
 awesome
+bluetui
 feh
 inotify-tools
 libnotify
 lxappearance
 lxsession
+nemo
 notify-send
 pacman-contrib
 picom
+pulsemixer
+pamixer
 rofi
 xdotool
 xorg-server

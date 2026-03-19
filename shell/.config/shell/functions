@@ -51,6 +51,30 @@ help() {
     "$@" --help 2>&1 | bathelp
 }
 
+# FZF font selector (copies name to clipboard on Enter)
+# fontSnatch() {
+  # fc-list : family | cut -d, -f1 | sort -u | fzf --preview "echo {}" | xclip -sel clip
+# }
+fontSnatch() {
+    local TEXT="ABCDEFGHIJKLM\nnopqrstuvwxyz\n0123456789\nSlashed 0: 0 vs O\n󰖩 󰂯 󰕾 "
+    local TMP_IMG='/tmp/preview_font.png'
+    trap "kitty +kitten icat --clear --stdin=no > /dev/tty" EXIT
+
+    fc-list : file family | sort -u | fzf \
+        --preview-window=right:60% \
+        --preview "
+            FONT_PATH=\$(echo {} | cut -d: -f1)
+
+            # Use 'caption' for automatic word-wrapping
+            magick -size 600x400 -background '#1e1e2e' -fill '#f8f8f2' \
+                   -font \"\$FONT_PATH\" -pointsize 30 \
+                   -gravity center caption:\"$TEXT\" \"$TMP_IMG\"
+
+            # Send to TTY directly
+            kitty +kitten icat --transfer-mode=file --stdin=no --place 50x30@60x5 \"$TMP_IMG\" > /dev/tty
+        " \
+        --bind "enter:execute-silent(echo -n {} | cut -d: -f2- | xargs echo -n | xclip -sel clip)+abort"
+}
 
 # # Use neovim
 if command -v nvim &> /dev/null; then
@@ -313,4 +337,40 @@ bu() {
 
     echo "[✓] Backup completed at $(date)" | tee -a "$log_file"
 }
+
+arpro() {
+    name="$1"
+    cmd="$2"
+    if [[ -z $cmd ]]; then
+      cmd="nv"
+    fi
+
+    [ -z "$name" ] && echo "Project name required" && return 1
+
+    mkdir -p "$name"
+
+    today=$(date +%F)
+
+    cat > "$name"/"$name".ino <<EOF
+// ------------------------------------------------------------
+//  Project: $name
+//  Created: $today
+//  Description: Starter Arduino sketch
+// ------------------------------------------------------------
+
+void setup() {
+    Serial.begin(9600);
+    delay(200);
+    Serial.println("Booting...");
+}
+
+void loop() {
+    // put your main code here
+}
+EOF
+
+    cd "$name" || return
+    $cmd "$name".ino
+}
+
 

@@ -6,7 +6,7 @@ count=0
 
 usage() {
     echo "Usage: web-thumbnail.sh [SIZE]"
-    echo "Creates web-optimized JPG thumbnails in ./thumbnails/"
+    echo "Creates web-optimized JPG thumbnails in ./thumbnail/"
     echo "Default size is $SIZE px (max width or height)."
     exit 0
 }
@@ -18,14 +18,14 @@ if [[ -n "$1" ]]; then
     SIZE="$1"
 fi
 
-mkdir -p thumbnails
+mkdir -p thumbnail
 
 for file in *; do
     [[ -e "$file" ]] || continue
     [[ -d "$file" ]] && continue
 
     # Target filename (always .jpg for web optimization)
-    target="thumbnails/${file%.*}.jpg"
+    target="thumbnail/${file%.*}.jpg"
 
     # Check if it's an image and if thumbnail already exists
     if magick identify "$file" >/dev/null 2>&1; then
@@ -40,4 +40,4 @@ for file in *; do
     fi
 done
 
-printf "\rFinished! %d thumbnails created in ./thumbnails/\e[K\n" "$count"
+printf "\rFinished! %d thumbnails created in ./thumbnail/\e[K\n" "$count"

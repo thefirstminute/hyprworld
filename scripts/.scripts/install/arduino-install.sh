@@ -32,6 +32,8 @@ else
     arduino-cli core install arduino:avr
 fi
 
+sudo pacman -S screen
+
 echo
 echo
 echo

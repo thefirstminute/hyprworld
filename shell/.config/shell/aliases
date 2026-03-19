@@ -56,7 +56,9 @@ alias \
 	ip="ip -color=auto"
 
 
-### Replaced apps
+### Replaced/Modified apps
+
+alias filezilla='GTK_THEME=Adwaita:dark filezilla'
 
 if command -v eza &> /dev/null; then
   alias \
@@ -67,6 +69,8 @@ fi
 if command -v nvim &> /dev/null; then
 alias \
   e="nvim" \
+  coc='NVIM_APPNAME=.neovims/coc nvim' \
+  ino='NVIM_APPNAME=.neovims/arduino nvim' \
   vimdiff="nvim -d"
 fi
 

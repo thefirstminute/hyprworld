@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+
+echo "processing images..."
+
+tmp=$(mktemp)
+
+for f in *.jpg *.jpeg *.png *.gif *.webp *.tiff; do
+    printf "."  # visual progress
+
+    read w h < <(identify -format "%w %h" "$f")
+    pixels=$(( w * h ))
+
+    # file size in MB (1 decimal)
+    size_mb=$(awk -v b="$(stat -c%s "$f")" 'BEGIN{printf "%.1f", b/1024/1024}')
+
+    # month + year
+    raw_ts=$(stat -c "%y" "$f")
+    ymd=${raw_ts%% *}          # 2026-03-11
+    year=${ymd%%-*}           # 2026
+    mnum=${ymd#*-}            # 03-11
+    mnum=${mnum%%-*}          # 03
+    case "$mnum" in
+        01) month=Jan ;;
+        02) month=Feb ;;
+        03) month=Mar ;;
+        04) month=Apr ;;
+        05) month=May ;;
+        06) month=Jun ;;
+        07) month=Jul ;;
+        08) month=Aug ;;
+        09) month=Sep ;;
+        10) month=Oct ;;
+        11) month=Nov ;;
+        12) month=Dec ;;
+        *)  month=??? ;;
+    esac
+    date="$month $year"
+
+    printf "%s\tw:%s h:%s size:%sM %s\t%s\n" \
+        "$pixels" "$w" "$h" "$size_mb" "$date" "$f" >> "$tmp"
+done
+
+echo ""
+echo "sorting..."
+
+sort -nr "$tmp" | while IFS=$'\t' read -r pixels info file; do
+    printf "%s %s\n" "$info" "$file"
+done
+
+rm "$tmp"
+

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# ghsnatch <github-folder-url>
+# Example:
+#   ghsnatch https://github.com/lcpz/awesome-copycats/tree/master/themes/vertex/icons
+
+set -e
+
+show_help() {
+    echo "Usage: ghsnatch <github-folder-url>"
+    echo "Example:"
+    echo "  ghsnatch https://github.com/user/repo/tree/branch/path/to/folder"
+    exit 1
+}
+
+# No args or -h → help
+[ -z "$1" ] && show_help
+[ "$1" = "-h" ] && show_help
+
+url="$1"
+
+# Must contain github.com
+if ! echo "$url" | grep -q "github.com"; then
+    echo "Error: URL must be a GitHub folder URL."
+    show_help
+fi
+
+# Strip protocol if present
+clean=$(echo "$url" | sed 's|https://||; s|http://||')
+
+# Remove leading github.com/
+clean=${clean#github.com/}
+
+# Extract owner, repo, branch, path
+owner=$(echo "$clean" | cut -d'/' -f1)
+repo=$(echo "$clean" | cut -d'/' -f2)
+branch=$(echo "$clean" | sed 's|.*tree/||' | cut -d'/' -f1)
+path=$(echo "$clean" | sed "s|.*/tree/$branch/||")
+
+# Build API URL
+api="https://api.github.com/repos/$owner/$repo/contents/$path?ref=$branch"
+
+# Create local directory structure
+# mkdir -p "$path"
+# cd "$path"
+
+# Fetch file list and download each file
+curl -s "$api" \
+  | grep '"download_url"' \
+  | cut -d '"' -f 4 \
+  | while read -r file; do
+      name=$(basename "$file")
+      echo "Downloading $name"
+      curl -s -O "$file"
+done
+

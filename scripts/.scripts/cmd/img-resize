@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+SIZE="350"
+
+usage() {
+  echo "Usage: img-resize FILE [-w WIDTH] [-h HEIGHT]"
+  exit 0
+}
+
+[[ -z "$1" || "$1" == "-h" || "$1" == "--help" ]] && usage
+
+FILE="$1"
+shift
+
+WIDTH=""
+HEIGHT=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -w|--width)
+      WIDTH="$2"
+      shift 2
+      ;;
+    -h|--height)
+      HEIGHT="$2"
+      shift 2
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+# Default if neither width nor height provided
+if [[ -z "$WIDTH" && -z "$HEIGHT" ]]; then
+  WIDTH="$SIZE"
+fi
+
+# Validate image
+if ! magick identify "$FILE" >/dev/null 2>&1; then
+  echo "Error: '$FILE' is not a valid image."
+  exit 1
+fi
+
+mkdir -p resized
+TARGET="resized/$(basename "$FILE")"
+
+# Build resize string
+if [[ -n "$WIDTH" && -n "$HEIGHT" ]]; then
+  RESIZE="${WIDTH}x${HEIGHT}>"
+elif [[ -n "$WIDTH" ]]; then
+  RESIZE="${WIDTH}x>"
+else
+  RESIZE="x${HEIGHT}>"
+fi
+
+magick "$FILE" \
+  -resize "$RESIZE" \
+  -sampling-factor 4:2:0 \
+  -strip \
+  -quality 80 \
+  -colorspace sRGB \
+  "$TARGET"
+
